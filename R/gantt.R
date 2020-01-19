@@ -3,7 +3,7 @@
 #' @param gantt The Gantt data from TAO
 #' @param names Names of the rows in the Gantt chart (don't have to be the same as in the PCI)
 #' @param timespan Duration of a time slot
-#' @param time.format The POSSIX time format that the data was formatted (see https://www.stat.berkeley.edu/~s133/dates.html). Use %d/0 when the Gantt-output was made using 0 for month
+#' @param time.format The POSSIX time format that the data was formatted (see https://www.stat.berkeley.edu/~s133/dates.html). Use \\%d/0 when the Gantt-output was made using 0 for month
 #'
 #' @return Returns a Gantt object
 #' @export
@@ -109,6 +109,7 @@ isBefore<-function(gantt,a=gantt$names[1],b=gantt$names[2],which.a="all",which.b
   )
 }
 #' @rdname isBefore
+#' @export
 isFirst<-function(gantt,a=gantt$names[1],which="all",orEqual=FALSE,strict=TRUE) {
   res<-rep(TRUE,length(gantt$gantt))
   for(i in gantt$names) {
@@ -122,10 +123,12 @@ isFirst<-function(gantt,a=gantt$names[1],which="all",orEqual=FALSE,strict=TRUE) 
 #' @param stict when TRUE, isAfter returns 0 when b is not set, otherwise a is after b, when b is not set
 #' @param b character or vector of characters
 #' @rdname isBefore
+#' @export
 isAfter<-function(gantt,a=gantt$names[1],b=gantt$names[2],which.a="all",which.b="all",orEqual=FALSE,strict=TRUE) {isBefore(gantt,b,a,which.b,which.a,orEqual=orEqual,strictAfter = strict)}
 
 #' Title
 #' @rdname isBefore
+#' @export
 isLast<-function(gantt,a=gantt$names[1],which="all",orEqual=FALSE,strict=TRUE) {
     res<-rep(TRUE,length(gantt$gantt))
     for(i in gantt$names) {
@@ -135,8 +138,9 @@ isLast<-function(gantt,a=gantt$names[1],which="all",orEqual=FALSE,strict=TRUE) {
 }
 
 
-#' @rdname isBefore
 #' @param which.a/which.b any: one or more a/b elements overlap, all: all a/b elements need to overlap, first/first: First a/b needs to overlap, last/last: Last a/b needs to overlap, or use number (or sequence)
+#' @rdname isBefore
+#' @export
 isOverlap<-function(gantt,a=gantt$names[1],b=gantt$names[2],which.a="any",which.b="any") {
   if(length(b)==1) b<-c(b)
   as.logical(
@@ -172,6 +176,7 @@ isOverlap<-function(gantt,a=gantt$names[1],b=gantt$names[2],which.a="any",which.
 #noOverlap only if there is actually elements that could have overlapped.
 #b: character or vector of characters
 #' @rdname isBefore
+#' @export
 noOverlap<-function(gantt,a=gantt$names[1],b=gantt$names[1]) {
   if(length(b)==1) b<-c(b)
   as.logical(
@@ -302,6 +307,7 @@ getMinTime<- function (gantt,a,which) {
 }
 # a is a vector of names
 #' @rdname getMinTime
+#' @export
 getMaxTime<- function (gantt,a,which) {
   #Create a list of 0 values to avoid warnings...
   c<-data.frame(min=matrix(rep(0,length(gantt$gantt))))

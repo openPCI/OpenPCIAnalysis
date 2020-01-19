@@ -16,6 +16,6 @@ Returns a text gap match object
 Make a text gap match object
 }
 \examples{
-mcresp<-c("['choice_1'; 'choice_5']","['choice_5'; 'choice_6']")
-mc<-makeMC(mcresp)
+matchresp<-c('{"room":["Chair"],"kitchen":["Pot"],"hallway":["Staircase"]}','{"room":["Sofa","table"],"kitchen":["Books"],"hallway":["Lion"]}')
+matchObj<-makeTextGapMatch(matchresp)
 }

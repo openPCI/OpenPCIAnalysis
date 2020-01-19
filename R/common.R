@@ -1,4 +1,12 @@
-# Initialize results
+#' Initialize result data.frame
+#'
+#' @param data a data.frame or matrix with a Test.taker column.
+#'
+#' @return a data.frame for the results
+#' @export
+#'
+#' @examples
+#' iniResult(data)
 iniResult<-function(data) {
   return(data.frame(testTaker=data$Test.taker))
 }
@@ -10,7 +18,8 @@ iniResult<-function(data) {
 #' @return Returns a list of responses.
 #' @export
 #' @description Gets responses from data produced by TAO.
-#' @examples getResponses(data,pattern=".RESPONSE")
+#' @examples 
+#' getResponses(data,pattern=".RESPONSE")
 getResponses<-function(data,pattern=".RESPONSE") {
   return(lapply(data,function(x) {x[,grep(pattern,colnames(x))]}))
 }
@@ -19,11 +28,10 @@ getResponses<-function(data,pattern=".RESPONSE") {
 #'
 #' @param data csv-formatted dataset.
 #' @param pattern RegExp pattern of the scoring columns.
-#'
+#' @export
 #' @return Gets scored data produced by TAO.
-#' @examples getScores(data,pattern=".SCORE")
-#'
-#' @examples
+#' @examples 
+#' getScores(data,pattern=".SCORE")
 getScores<-function(data,pattern=".SCORE") {
   return(lapply(data,function(x) {x[,grep(pattern,colnames(x))]}))
 }
@@ -81,6 +89,8 @@ writeResult<-function(result,filename,resultsdir) {
   resp<-resp[,colSums(resp,na.rm = T)!=0]
   resp
 }
+#' @rdname writeResult
+#' @export
 writeCoded<-function(coded,filename,resultsdir) {
   write.csv2(coded,paste0(resultsdir,filename,".csv"),row.names = F)
 }

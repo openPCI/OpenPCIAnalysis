@@ -45,6 +45,8 @@ makeSC<-function(resp) {
 #' mcresp<-c("['choice_1'; 'choice_5']","['choice_5'; 'choice_6']")
 #' mc<-makeMC(mcresp)
 #' scoreMC(mc,correct=c("choice_1","choice_5"))
-scoreSC<-scoreMC<-function(mc,correct=c()) {
-  return (as.numeric(lapply(sc,function(x) length(intersect(x,correct)))))
+scoreMC<-function(mc,correct=c()) {
+  return (as.numeric(lapply(mc,function(x) length(intersect(x,correct)))))
 }
+#' @rdname scoreMC
+scoreSC<-scoreMC

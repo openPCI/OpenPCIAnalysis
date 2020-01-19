@@ -41,6 +41,7 @@ isOrderBefore<-function(orderObject,a,b,strict=T,count=F) {
   ifelse(is.na(res),0,res)
 }
 #' @rdname isOrderBefore
+#' @export
 isOrderAfter<-function(orderObject,a,b,strict=T) {
   if(count)
     res<-as.numeric(lapply(orderObject,function(x) {sum(which(x==a)>which(x %in% b),na.rm = T)}))
@@ -49,6 +50,7 @@ isOrderAfter<-function(orderObject,a,b,strict=T) {
   ifelse(is.na(res),0,res)
 }
 #' @rdname isOrderBefore
+#' @export
 isOrderSet<-function(orderObject,a) {
   res<-as.logical(lapply(orderObject,function(x) {x<-ifelse(is.na(x),0,x); ifelse(length(x)>0,which(x==a)>0,F)}))
   ifelse(is.na(res),0,res)

@@ -13,7 +13,7 @@ makeGantt(gantt, names, timespan = 30, time.format = "\%d/\%m \%H:\%M")
 
 \item{timespan}{Duration of a time slot}
 
-\item{time.format}{The POSSIX time format that the data was formatted (see https://www.stat.berkeley.edu/~s133/dates.html). Use %d/0 when the Gantt-output was made using 0 for month}
+\item{time.format}{The POSSIX time format that the data was formatted (see https://www.stat.berkeley.edu/~s133/dates.html). Use \\\%d/0 when the Gantt-output was made using 0 for month}
 }
 \value{
 Returns a Gantt object

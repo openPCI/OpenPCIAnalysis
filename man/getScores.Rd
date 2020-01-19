@@ -19,5 +19,4 @@ Get already scored items
 }
 \examples{
 getScores(data,pattern=".SCORE")
-
 }

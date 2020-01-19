@@ -2,9 +2,12 @@
 % Please edit documentation in R/common.R
 \name{writeResult}
 \alias{writeResult}
+\alias{writeCoded}
 \title{Write results}
 \usage{
 writeResult(result, filename, resultsdir)
+
+writeCoded(coded, filename, resultsdir)
 }
 \arguments{
 \item{result}{A data.frame with results}
