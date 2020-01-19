@@ -1,0 +1,10 @@
+Package: OpenPCIScoring
+Type: Package
+Title: Automatic Scoring of OpenPCI-items
+Version: 1.0
+Date: 2020-01-17
+Author: Jeppe Bundsgaard <jebu@edu.au.dk>
+Maintainer: Jeppe Bundsgaard <jebu@edu.au.dk>
+Description: Automatic scoring of OpenPCI-items
+License: GNU GPLv3 <https://www.gnu.org/licenses/gpl-3.0.en.html>
+RoxygenNote: 7.0.2
