@@ -59,26 +59,37 @@ isSet<-function(gantt,a=1) {
   )
 }
 
-#' Check relations between elements: isBefore, isAfter, isOverlap, noOverlap
+#' Check relations between elements: isBefore, isAfter, isOverlap, noOverlap, isFirst, isLast
 #'
 #' @param gantt gantt object (from makeGantt).
-#' @param a element in the gantt chart (character vector).
+#' @param a element or elements in the gantt chart (character or vector of characters).
 #' @param b element or elements (character or vector of characters).
-#' @param which.a "all"/"last": all a should be before, first: Only first needs to be before (starts before), or use a number to use in comparison.
-#' @param which.b "all"/"first": all b should be after, last: Only last b needs to be after (ends later), or use a number to use in comparison.
+#' @param which.a,which.b "all": consider all slots of a/b, "first": only consider the first slot of a/b, "last": only consider the last slot of a/b. If which.a/which.b is a number n, the n'th slot is used in the comparison.
+#' @param which "all": consider all slots of element, "first": only consider the first slot of element, "last": only consider the last slot of element. If which is a number n, the n'th slot is used in the comparison.
 #' @param orEqual if TRUE, a and b can be at the same time (not just before/after).
 #' @param strict if FALSE, an element a is considered before/after even though b is not present.
 #'
-#' @return When stict is TRUE, isBefore returns 0 when b is not set, otherwise a is before b, when b is not set
+#' @return When stict is TRUE, returns 0 when b is not set, when strict is FALSE, a is before b, when b is not set.
 #' @export
+#' 
+#' @details 
+#' In these functions a and b are compared. Which.a and which.b decides which parts of a an b take part in the comparison. 
+#' If which.a is "all", all the slots of a are compared to the which.b slots. If which.a is "first", only the first slot of a is considered in the comparison.
+#' If which.b is "last", only the last slot of a is considered in the comparison.
+#' The same goes for which.b: if b is "all", all slots of b are considered, if b is "first" or "last", only the first/last slot is considered in the comparison.
+#' For example, in isBefore, if which.a is "first" and which.b is last, the first slot of a needs to be before the last slot of b.
+#' 
+#' orEqual relaxes the condition of before or after, first or last, so the selected parts of a and b can be overlapping as well.
 #'
 #' @examples 
-#' response<-"{'response':'1/8 10:30 - 1/8 12:30;1/8 13:00 - 1/8 14:00;1/8 11:30 - 1/8 12:30'}"
+#' response<-"{'response':'1/8 10:30 - 1/8 13:00;1/8 13:00 - 1/8 14:00;1/8 11:30 - 1/8 12:30'}"
 #' gantt<-makeGantt(response,names=c("waitress","actor","pianist"),timespan=30,time.format="%d/%m %H:%M")
-#' isBefore(gantt,"actor",c("waitress","pianist"),which.a = "first",which.b = "first",orEqual = TRUE,strict = FALSE)
-#' isAfter(gantt,"actor",c("waitress"),which.a = "last",which.b = "all")
-#' isLast(gantt,"actor")
-#' isFirst(gantt,"actor")
+#' isBefore(gantt,"waitress",c("actor"),which.a = "first",which.b = "first")
+#' isBefore(gantt,"waitress",c("actor"),which.a = "all",which.b = "first")
+#' isBefore(gantt,"waitress",c("actor"),which.a = "all",which.b = "first",orEqual = TRUE)
+#' isAfter(gantt,c("pianist","actor"),c("waitress"),which.a = "last",which.b = "all")
+#' isLast(gantt,"waitress")
+#' isFirst(gantt,"waitress",which="first")
 #' isOverlap(gantt,"actor","waitress")
 isBefore<-function(gantt,a=gantt$names[1],b=gantt$names[2],which.a="all",which.b="all",orEqual=FALSE,strict=TRUE,strictAfter=TRUE) {
   #strictAfter is only used internally to control strict from isAfter
@@ -88,21 +99,23 @@ isBefore<-function(gantt,a=gantt$names[1],b=gantt$names[2],which.a="all",which.b
   as.logical(
     lapply(gantt$gantt,function (x) {
       res<-TRUE
-      for(i in b) {
-        aval<-switch(which.a,
-                     all=x[[a]][length(x[[a]])], # Last element
-                     first=x[[a]][1], # First 
-                     x[[a]][which.a] # Given number
-        )
-        bval<-switch(which.b,
-                 last=x[[i]][length(x[[i]])], # Last element
-                 all=x[[i]][1], # First b 
-                 x[[b]][which.b] # Given number
-        )
-        if(!strict & is.null(bval)) bval<-Inf
-        if(!strictAfter & is.null(aval)) aval<-0
-        thisres<-ifelse(orEqual,aval <= bval,aval < bval)
-        res<-ifelse(is.na(thisres),0,res & thisres)
+      for(i in a) {
+        for(j in b) {
+          aval<-switch(which.a,
+                       all=x[[i]][length(x[[i]])], # Last element
+                       first=x[[i]][1], # First 
+                       x[[i]][which.a] # Given number
+          )
+          bval<-switch(which.b,
+                   last=x[[j]][length(x[[j]])], # Last element
+                   all=x[[j]][1], # First b 
+                   x[[j]][which.b] # Given number
+          )
+          if(!strict & is.null(bval)) bval<-Inf
+          if(!strictAfter & is.null(aval)) aval<-0
+          thisres<-ifelse(orEqual,aval <= bval,aval < bval)
+          res<-ifelse(is.na(thisres),0,res & thisres)
+        }
       }
       return(res)
     })
@@ -118,10 +131,6 @@ isFirst<-function(gantt,a=gantt$names[1],which="all",orEqual=FALSE,strict=TRUE) 
   return(res)
 }
 
-#' @param which.a "all": all a should be after, last: Only last needs to be after (ends later), or use a number to use in comparison
-#' @param which.b "all": all b should be before, first: Only first b needs to be after (starts before), or use a number to use in comparison
-#' @param stict when TRUE, isAfter returns 0 when b is not set, otherwise a is after b, when b is not set
-#' @param b character or vector of characters
 #' @rdname isBefore
 #' @export
 isAfter<-function(gantt,a=gantt$names[1],b=gantt$names[2],which.a="all",which.b="all",orEqual=FALSE,strict=TRUE) {isBefore(gantt,b,a,which.b,which.a,orEqual=orEqual,strictAfter = strict)}
@@ -138,7 +147,7 @@ isLast<-function(gantt,a=gantt$names[1],which="all",orEqual=FALSE,strict=TRUE) {
 }
 
 
-#' @param which.a/which.b any: one or more a/b elements overlap, all: all a/b elements need to overlap, first/first: First a/b needs to overlap, last/last: Last a/b needs to overlap, or use number (or sequence)
+#' @param which.a/which.b for isOverlap: any: one or more a/b elements overlap, all: all a/b elements need to overlap, first/first: First a/b needs to overlap, last/last: Last a/b needs to overlap, or use number (or sequence)
 #' @rdname isBefore
 #' @export
 isOverlap<-function(gantt,a=gantt$names[1],b=gantt$names[2],which.a="any",which.b="any") {

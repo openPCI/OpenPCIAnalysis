@@ -7,7 +7,7 @@
 \alias{isLast}
 \alias{isOverlap}
 \alias{noOverlap}
-\title{Check relations between elements: isBefore, isAfter, isOverlap, noOverlap}
+\title{Check relations between elements: isBefore, isAfter, isOverlap, noOverlap, isFirst, isLast}
 \usage{
 isBefore(
   gantt,
@@ -59,36 +59,45 @@ noOverlap(gantt, a = gantt$names[1], b = gantt$names[1])
 \arguments{
 \item{gantt}{gantt object (from makeGantt).}
 
-\item{a}{element in the gantt chart (character vector).}
+\item{a}{element or elements in the gantt chart (character or vector of characters).}
 
-\item{b}{character or vector of characters}
+\item{b}{element or elements (character or vector of characters).}
 
-\item{which.a}{"all": all a should be after, last: Only last needs to be after (ends later), or use a number to use in comparison}
-
-\item{which.b}{"all": all b should be before, first: Only first b needs to be after (starts before), or use a number to use in comparison}
+\item{which.a, which.b}{"all": consider all slots of a/b, "first": only consider the first slot of a/b, "last": only consider the last slot of a/b. If which.a/which.b is a number n, the n'th slot is used in the comparison.}
 
 \item{orEqual}{if TRUE, a and b can be at the same time (not just before/after).}
 
 \item{strict}{if FALSE, an element a is considered before/after even though b is not present.}
 
-\item{stict}{when TRUE, isAfter returns 0 when b is not set, otherwise a is after b, when b is not set}
+\item{which}{"all": consider all slots of element, "first": only consider the first slot of element, "last": only consider the last slot of element. If which is a number n, the n'th slot is used in the comparison.}
 
-\item{which.a/which.b}{any: one or more a/b elements overlap, all: all a/b elements need to overlap, first/first: First a/b needs to overlap, last/last: Last a/b needs to overlap, or use number (or sequence)}
+\item{which.a/which.b}{for isOverlap: any: one or more a/b elements overlap, all: all a/b elements need to overlap, first/first: First a/b needs to overlap, last/last: Last a/b needs to overlap, or use number (or sequence)}
 }
 \value{
-When stict is TRUE, isBefore returns 0 when b is not set, otherwise a is before b, when b is not set
+When stict is TRUE, returns 0 when b is not set, when strict is FALSE, a is before b, when b is not set.
 }
 \description{
-Check relations between elements: isBefore, isAfter, isOverlap, noOverlap
+Check relations between elements: isBefore, isAfter, isOverlap, noOverlap, isFirst, isLast
 
 Title
 }
+\details{
+In these functions a and b are compared. Which.a and which.b decides which parts of a an b take part in the comparison.
+If which.a is "all", all the slots of a are compared to the which.b slots. If which.a is "first", only the first slot of a is considered in the comparison.
+If which.b is "last", only the last slot of a is considered in the comparison.
+The same goes for which.b: if b is "all", all slots of b are considered, if b is "first" or "last", only the first/last slot is considered in the comparison.
+For example, in isBefore, if which.a is "first" and which.b is last, the first slot of a needs to be before the last slot of b.
+
+orEqual relaxes the condition of before or after, first or last, so the selected parts of a and b can be overlapping as well.
+}
 \examples{
-response<-"{'response':'1/8 10:30 - 1/8 12:30;1/8 13:00 - 1/8 14:00;1/8 11:30 - 1/8 12:30'}"
+response<-"{'response':'1/8 10:30 - 1/8 13:00;1/8 13:00 - 1/8 14:00;1/8 11:30 - 1/8 12:30'}"
 gantt<-makeGantt(response,names=c("waitress","actor","pianist"),timespan=30,time.format="\%d/\%m \%H:\%M")
-isBefore(gantt,"actor",c("waitress","pianist"),which.a = "first",which.b = "first",orEqual = TRUE,strict = FALSE)
-isAfter(gantt,"actor",c("waitress"),which.a = "last",which.b = "all")
-isLast(gantt,"actor")
-isFirst(gantt,"actor")
+isBefore(gantt,"waitress",c("actor"),which.a = "first",which.b = "first")
+isBefore(gantt,"waitress",c("actor"),which.a = "all",which.b = "first")
+isBefore(gantt,"waitress",c("actor"),which.a = "all",which.b = "first",orEqual = TRUE)
+isAfter(gantt,c("pianist","actor"),c("waitress"),which.a = "last",which.b = "all")
+isLast(gantt,"waitress")
+isFirst(gantt,"waitress",which="first")
 isOverlap(gantt,"actor","waitress")
 }
