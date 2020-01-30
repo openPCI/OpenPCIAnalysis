@@ -79,7 +79,11 @@ isSet<-function(gantt,a=1) {
 #' The same goes for which.b: if b is "all", all slots of b are considered, if b is "first" or "last", only the first/last slot is considered in the comparison.
 #' For example, in isBefore, if which.a is "first" and which.b is last, the first slot of a needs to be before the last slot of b.
 #' 
+#' In practice this means that for isBefore, when a is "all", the last slot of a is compared to b, and when b is "all", the first slot of b i compared to a.
+#' 
 #' orEqual relaxes the condition of before or after, first or last, so the selected parts of a and b can be overlapping as well.
+#' This result in that which.a="all" and orEqual=T means that the last slot are allowed to overlap.
+
 #'
 #' @examples 
 #' response<-"{'response':'1/8 10:30 - 1/8 13:00;1/8 13:00 - 1/8 14:00;1/8 11:30 - 1/8 12:30'}"
