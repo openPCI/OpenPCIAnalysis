@@ -365,7 +365,7 @@ expandtime<-function(x,timespan,time.format) {
       for(j in 1:(numintervals)) {
         y<-c(y,format(start+timespan*60*j,time.format))
       }
-    } else {y<-c(y,NA)}
+    } else {y<-c(y,ifelse(grepl("NaN",i),NA,i))}
   }
   return (y)
 }
