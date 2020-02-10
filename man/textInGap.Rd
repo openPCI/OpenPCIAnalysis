@@ -11,7 +11,7 @@ textInGap(textGapMatchObject, text, gap, no.where.else = TRUE)
 
 \item{text}{The text to look for}
 
-\item{gap}{The gap to look in}
+\item{gap}{The gap(s) to look in}
 
 \item{no.where.else}{Only accept it if it is only here}
 }
@@ -22,5 +22,8 @@ Returns the scores
 Test for text in gap match
 }
 \examples{
-To come
+resp<-"{\"dropzone_1\":[\"1.Decide size of building\",\"2.Paint the walls\",\"4.Get a quote\"],\"dropzone_2\":[\"1.Move furniture\",\"2.Hire workers\"],\"dropzone_3\":[\"1.Test the construction\",\"2.Move in\",\"3.Paint the walls\"]}"
+gm<-makeTextGapMatch(resp)
+textInGap(gm,"Paint the walls","dropzone_1")
+textInGap(gm,"Paint the walls","dropzone_1",no.where.else=F)
 }

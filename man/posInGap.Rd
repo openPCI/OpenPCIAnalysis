@@ -20,5 +20,7 @@ Returns the scores
 The position in gap match
 }
 \examples{
-To come
+resp<-"{\"dropzone_1\":[\"1.Decide size of building\",\"2.Paint the walls\",\"4.Get a quote\"],\"dropzone_2\":[\"1.Move furniture\",\"2.Hire workers\"],\"dropzone_3\":[\"1.Test the construction\",\"2.Move in\"]}"
+gm<-makeTextGapMatch(resp)
+posInGap(gm,"Paint the walls",1)
 }

@@ -21,24 +21,36 @@ makeTextGapMatch<-function(resp) {
 #'
 #' @param textGapMatchObject a textGapMatchObject 
 #' @param text The text to look for
-#' @param gap The gap to look in
+#' @param gap The gap(s) to look in
 #' @param no.where.else Only accept it if it is only here
 #'
 #' @return Returns the scores
 #' @export
 #'
-#' @examples To come
+#' @examples 
+#' resp<-"{\"dropzone_1\":[\"1.Decide size of building\",\"2.Paint the walls\",\"4.Get a quote\"],\"dropzone_2\":[\"1.Move furniture\",\"2.Hire workers\"],\"dropzone_3\":[\"1.Test the construction\",\"2.Move in\",\"3.Paint the walls\"]}"
+#' gm<-makeTextGapMatch(resp)
+#' textInGap(gm,"Paint the walls","dropzone_1")
+#' textInGap(gm,"Paint the walls","dropzone_1",no.where.else=F)
 textInGap<-function(textGapMatchObject,text,gap,no.where.else=TRUE) {
-  isIn=rep(0,length(textGapMatchObject))
-  for(i in gap) {
-    isIn<-(isIn + as.logical(lapply(textGapMatchObject,function(x) {text %in% x[[i]]})))
-  }
+  isIn<-lapply(textGapMatchObject,function(x) {
+    isInHere<-F
+    for(i in 1:length(gap)) {
+      isInHere<-isInHere || any(grepl(pattern = paste0("^[0-9.]*",text,"$"),x[[gap[i]]]))
+    }
+    isInHere
+  })
   if(no.where.else) {
     gaps<-names(textGapMatchObject[[1]])
-    for(i in gaps) {
-      if(!(i %in% gap))
-        isIn<-(isIn * (!as.logical(lapply(textGapMatchObject,function(x) {text %in% x[[i]]}))))
-    }
+    isInOther<-lapply(textGapMatchObject,function(x) {
+      isInHere<-F
+      for(i in 1:length(gaps)) {
+        if(!(gaps[i] %in% gap))
+          isInHere<-isInHere || any(grepl(pattern = paste0("^[0-9.]*",text,"$"),x[[gaps[i]]]))
+      }
+      isInHere
+    })
+    isIn<-sapply(1:length(isIn), function(x) isIn[[x]] && !isInOther[[x]])
   }
   return(isIn)
 }
@@ -51,8 +63,11 @@ textInGap<-function(textGapMatchObject,text,gap,no.where.else=TRUE) {
 #' @return Returns the scores
 #' @export
 #'
-#' @examples To come
+#' @examples 
+#' resp<-"{\"dropzone_1\":[\"1.Decide size of building\",\"2.Paint the walls\",\"4.Get a quote\"],\"dropzone_2\":[\"1.Move furniture\",\"2.Hire workers\"],\"dropzone_3\":[\"1.Test the construction\",\"2.Move in\"]}"
+#' gm<-makeTextGapMatch(resp)
+#' posInGap(gm,"Paint the walls",1)
 posInGap<-function(textGapMatchObject,text,gap) {
-  posIn<-as.numeric(lapply(textGapMatchObject,function(x) {pos<-which(x[[gap]]==text);if(length(pos)>0) pos else 0}))
+  posIn<-as.numeric(lapply(textGapMatchObject,function(x) {pos<-which(grepl(pattern = paste0("^[0-9.]*",text,"$"),x[[gap]]));if(length(pos)>0) pos else 0}))
   return(posIn)
 }
