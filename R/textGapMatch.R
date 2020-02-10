@@ -41,12 +41,14 @@ textInGap<-function(textGapMatchObject,text,gap,no.where.else=TRUE) {
     isInHere
   })
   if(no.where.else) {
-    gaps<-names(textGapMatchObject[[1]])
     isInOther<-lapply(textGapMatchObject,function(x) {
       isInHere<-F
-      for(i in 1:length(gaps)) {
-        if(!(gaps[i] %in% gap))
-          isInHere<-isInHere || any(grepl(pattern = paste0("^[0-9.]*",text,"$"),x[[gaps[i]]]))
+      gaps<-names(x)
+      if(length(gaps)>0) {
+        for (i in 1:length(gaps)) {
+          if (!(gaps[i] %in% gap)) 
+            isInHere <- isInHere || any(grepl(pattern = paste0("^[0-9.]*", text, "$"), x[[gaps[i]]]))
+        }
       }
       isInHere
     })
