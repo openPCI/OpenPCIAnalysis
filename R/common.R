@@ -48,11 +48,12 @@ getScores<-function(data,pattern=".SCORE") {
 #' @examples getDurations(data,exclude="notthiscolumn")
 getDurations<-function(data,exclude="") {
   durations<-lapply(data,function(x) {z<-x[,grep("duration",colnames(x))];rownames(z)<-x$Test.taker;return(z)})
-  durations<-lapply(durations,apply,1:2,function(x) {
-    gsub("0([0-9]+[HM\\.])","\\1",sub("PT(([0-9]+)H)?(([0-9]+)M)?(([0-9]+)\\.([0-9]+)S)?","0\\2H0\\4M0\\6.\\70S",x))
-    # sub("PT","",ifelse(!grepl("H",x),paste0("0H",ifelse(!grepl("M",x),paste0("0M",ifelse(!grepl(".",x,fixed = T),paste0(x,"0.0S"),x)),x)),x))
-    })
-  durations<-lapply(durations,apply,1:2,function(x) {as.difftime(x,format="%HH%MM%OSS",units="secs")})
+  # durations<-lapply(durations,apply,1:2,function(x) {
+  #   gsub("0([0-9]+[HM\\.])","\\1",sub("PT(([0-9]+)H)?(([0-9]+)M)?(([0-9]+)\\.([0-9]+)S)?","0\\2H0\\4M0\\6.\\70S",x))
+  #   # sub("PT","",ifelse(!grepl("H",x),paste0("0H",ifelse(!grepl("M",x),paste0("0M",ifelse(!grepl(".",x,fixed = T),paste0(x,"0.0S"),x)),x)),x))
+  #   })
+  #durations<-lapply(durations,apply,1:2,function(x) {as.difftime(x,format="%HH%MM%OSS",units="secs")})
+  durations<-lapply(durations,apply,1:2,function(x) {as.numeric(x)})
   # Remove columns with all NA's
   durations<-lapply(durations,function(x) x[,colSums(is.na(x))<nrow(x)])
   # Remove excludes
