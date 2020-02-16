@@ -4,12 +4,14 @@
 \alias{getDurations}
 \title{Calculate durations}
 \usage{
-getDurations(data, exclude = "")
+getDurations(data, exclude = "", TAO.version = 33)
 }
 \arguments{
 \item{data}{List of modules}
 
 \item{exclude}{Columns containing this text should not be counted in. Use text1|text2 to exclude more than one text}
+
+\item{TAO.version}{Numeric value of TAO version. Versions before 33 provided POSIX information on the duration. Version 33 and after provides seconds.}
 }
 \value{
 Returns a list durations=durations,median=median,testMedian=testMedian,mean=mean,testMean=testMean,max=max,testMax=testMax

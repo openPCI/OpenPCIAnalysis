@@ -40,20 +40,21 @@ getScores<-function(data,pattern=".SCORE") {
 #'
 #' @param data List of modules
 #' @param exclude Columns containing this text should not be counted in. Use text1|text2 to exclude more than one text
-#' 
+#' @param TAO.version Numeric value of TAO version. Versions before 33 provided POSIX information on the duration. Version 33 and after provides seconds.
 #' @description Calculate time spent on each item by all students. E.g. use this to set response to NA when the time spent is very few seconds.
 #' @return Returns a list durations=durations,median=median,testMedian=testMedian,mean=mean,testMean=testMean,max=max,testMax=testMax
 #' @export
 #'
 #' @examples getDurations(data,exclude="notthiscolumn")
-getDurations<-function(data,exclude="") {
+getDurations<-function(data,exclude="",TAO.version=33) {
   durations<-lapply(data,function(x) {z<-x[,grep("duration",colnames(x))];rownames(z)<-x$Test.taker;return(z)})
-  # durations<-lapply(durations,apply,1:2,function(x) {
-  #   gsub("0([0-9]+[HM\\.])","\\1",sub("PT(([0-9]+)H)?(([0-9]+)M)?(([0-9]+)\\.([0-9]+)S)?","0\\2H0\\4M0\\6.\\70S",x))
-  #   # sub("PT","",ifelse(!grepl("H",x),paste0("0H",ifelse(!grepl("M",x),paste0("0M",ifelse(!grepl(".",x,fixed = T),paste0(x,"0.0S"),x)),x)),x))
-  #   })
-  #durations<-lapply(durations,apply,1:2,function(x) {as.difftime(x,format="%HH%MM%OSS",units="secs")})
-  durations<-lapply(durations,apply,1:2,function(x) {as.numeric(x)})
+  if(TAO.version<33) {
+    durations<-lapply(durations,apply,1:2,function(x) {
+      gsub("0([0-9]+[HM\\.])","\\1",sub("PT(([0-9]+)H)?(([0-9]+)M)?(([0-9]+)\\.([0-9]+)S)?","0\\2H0\\4M0\\6.\\70S",x))
+      # sub("PT","",ifelse(!grepl("H",x),paste0("0H",ifelse(!grepl("M",x),paste0("0M",ifelse(!grepl(".",x,fixed = T),paste0(x,"0.0S"),x)),x)),x))
+      })
+    durations<-lapply(durations,apply,1:2,function(x) {as.difftime(x,format="%HH%MM%OSS",units="secs")})
+  } else durations<-lapply(durations,apply,1:2,function(x) {as.numeric(x)})
   # Remove columns with all NA's
   durations<-lapply(durations,function(x) x[,colSums(is.na(x))<nrow(x)])
   # Remove excludes
