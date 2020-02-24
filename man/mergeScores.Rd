@@ -9,9 +9,9 @@ mergeScores(result, resp, column, prefix = "")
 \arguments{
 \item{result}{result of scoring script. A matrix.}
 
-\item{resp}{Response data.frame from TAO}
+\item{resp}{Response data.frame from TAO or from pre-coded items.}
 
-\item{column}{the column to merge with the results}
+\item{column}{String. The beginning of the name of the columns to merge with the results. If more columns start with the provided string, all of them are included.}
 
 \item{prefix}{Text to put before the variable name}
 }
