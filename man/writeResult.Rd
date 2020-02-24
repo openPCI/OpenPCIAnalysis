@@ -5,7 +5,7 @@
 \alias{writeCoded}
 \title{Write results}
 \usage{
-writeResult(result, filename, resultsdir)
+writeResult(result, filename, resultsdir, exclude = c())
 
 writeCoded(coded, filename, resultsdir)
 }
@@ -15,6 +15,8 @@ writeCoded(coded, filename, resultsdir)
 \item{filename}{Where to write the results}
 
 \item{resultsdir}{The path to the directory of the file}
+
+\item{exclude}{A vector of column names or numbers which are not numeric, and therefore should be excluded from the cleaning.}
 }
 \value{
 Returns the cleaned results.

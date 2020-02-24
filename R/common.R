@@ -76,20 +76,22 @@ getDurations<-function(data,exclude="",TAO.version=33) {
 #' @param result A data.frame with results
 #' @param filename Where to write the results
 #' @param resultsdir The path to the directory of the file
+#' @param exclude A vector of column names or numbers which are not numeric, and therefore should be excluded from the cleaning.
 #'
 #' @return Returns the cleaned results.
 #' @export
 #'
 #' @examples writeResult(result,filename,resultsdir)
-writeResult<-function(result,filename,resultsdir) {
-  resp<-result[,2:ncol(result)]
-  resp<-apply(resp,1:2,as.numeric)
-  result[,2:ncol(result)]<-resp#apply(result[,2:ncol(result)],1:2,function(x) {ifelse(is.na(x),-1, as.numeric(x))})
+writeResult<-function(result,filename,resultsdir,exclude=c()) {
+  if(!is.numeric(exclude)) exclude<-which(colnames(result) %in% exclude)
+  #resp<-result[,2:ncol(result)]
+  result[,-exclude]<-apply(result[,-exclude],1:2,function(x) ifelse(is.na(x),x,as.numeric(x)))
+  #result[,2:ncol(result)]<-resp#apply(result[,2:ncol(result)],1:2,function(x) {ifelse(is.na(x),-1, as.numeric(x))})
   # result<-apply(result,1:2,function(x) x=ifelse(x==-1,NA,x))
   write.csv2(result,paste0(resultsdir,filename,".csv"),row.names = F)
 #  print(resp)
-  resp<-resp[,colSums(resp,na.rm = T)!=0]
-  resp
+  #resp<-resp[,colSums(resp,na.rm = T)!=0]
+  result
 }
 #' @rdname writeResult
 #' @export
