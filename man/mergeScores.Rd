@@ -25,5 +25,8 @@ Merge scores from pre-coded items
 }
 \examples{
 # Make sure not to import data from item X20
-result<-mergeScores(result,prescoredresults,"X2[^0-9]","TM2_")
+result<-data.frame(id=c("a","b","a","b","c","d","a"))
+resp<-data.frame(id=c("b","b","a","a","c","d","a"),X1=c(1,NA,2,2,1,3,NA))
+
+result<-mergeScores(result=result,resp=resp,column="X1",prefix="X1_")
 }

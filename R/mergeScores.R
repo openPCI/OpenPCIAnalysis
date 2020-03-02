@@ -11,14 +11,17 @@
 #'
 #' @examples
 #' # Make sure not to import data from item X20
-#' result<-mergeScores(result,prescoredresults,"X2[^0-9]","TM2_")
+#' result<-data.frame(id=c("a","b","a","b","c","d","a"))
+#' resp<-data.frame(id=c("b","b","a","a","c","d","a"),X1=c(1,NA,2,2,1,3,NA))
+#' 
+#' result<-mergeScores(result=result,resp=resp,column="X1",prefix="X1_")
 mergeScores<-function(result,resp,column,prefix="",test.taker=NULL) {
-  if(!is.null(test.taker)) resp<-cbind(data.frame(test.taker=test.taker),resp)
+  if(!is.null(test.taker)) resp<-cbind(data.frame(test.taker=test.taker,stringsAsFactors = F),resp)
   cols<-grepl(paste0("^",column),names(resp),ignore.case = T)
   if(any(cols)) {
     for(onecolumn in which(cols)) {
       respcolumn<-resp[,onecolumn]
-      if(inherits(respcolumn,"integer")) {
+      if(inherits(respcolumn,c("integer","numeric"))) {
         scores<-as.data.frame(respcolumn)
         colnam<-sub(".*\\.(.*)","\\1",colnames(resp)[onecolumn])
       } else {
@@ -32,10 +35,32 @@ mergeScores<-function(result,resp,column,prefix="",test.taker=NULL) {
       }
       #print(colnam)
       colnames(scores)<-paste0(prefix,colnam)
-      testTaker<-data.frame(testTaker=resp[,1])
-      scoresAndTaker<-cbind(testTaker,scores)
-      #scoresAndTaker<-scoresAndTaker[apply(scores,1,function(x) {sum(is.na(x))!=length(x)}),]
-      result<-merge(result,scoresAndTaker,by.x=colnames(result)[1],by.y=colnames(scoresAndTaker)[1],all.x=T)
+      testTaker<-resp[,1]
+      # If the testtakers are in the same order, just cbind (takes care of duplets)
+      done<-F
+      if(nrow(result)==nrow(scores)) {
+        if(all(as.character(testTaker)==as.character(result[,1]))) {
+          result<-cbind(result,scores)
+          done<-T
+        } 
+      }
+      if(!done) { # Merge combines the data.frames in all possible ways - resulting in more rows if there are duplet testtakers
+        # Remove duplicate testTakers in resp by giving them the highest value
+        
+        dups<-which(duplicated(testTaker))
+        revised.testTaker<-testTaker[-dups]
+        revised.scores<-scores[-dups,]
+        for(x in dups) {
+          # Next time you meet a duplicate of the same testtaker, you will do the same calculation - no problem
+          tt<-testTaker[x]
+          max.score<-max(scores[testTaker==tt,],na.rm = T)
+          # give the max value to the unified testtaker
+          revised.scores[which(revised.testTaker==tt)]<-max.score
+        }
+        scoresAndTaker<-cbind(data.frame(revised.testTaker),data.frame(revised.scores))
+        
+        result<-merge(result,scoresAndTaker,by.x=colnames(result)[1],by.y=colnames(scoresAndTaker)[1],all.x=T)
+      }
     }
   } else warning(paste("Merge Scores: No column starting with",column,"in response data.frame"))
   return (result) 
