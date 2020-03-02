@@ -35,7 +35,7 @@ mergeScores<-function(result,resp,column,prefix="",test.taker=NULL) {
       testTaker<-data.frame(testTaker=resp[,1])
       scoresAndTaker<-cbind(testTaker,scores)
       #scoresAndTaker<-scoresAndTaker[apply(scores,1,function(x) {sum(is.na(x))!=length(x)}),]
-      result<-merge(result,scoresAndTaker,by.x=colnames(result)[1],by.y=colnames(scoresAndTaker)[1])
+      result<-merge(result,scoresAndTaker,by.x=colnames(result)[1],by.y=colnames(scoresAndTaker)[1],all.x=T)
     }
   } else warning(paste("Merge Scores: No column starting with",column,"in response data.frame"))
   return (result) 
