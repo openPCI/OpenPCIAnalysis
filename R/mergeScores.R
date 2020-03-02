@@ -66,6 +66,7 @@ mergeScores<-function(result,resp,column,prefix="",test.taker=NULL) {
           revised.scores[which(revised.testTaker==tt)]<-max.score
         }
         scoresAndTaker<-cbind(data.frame(revised.testTaker),data.frame(revised.scores))
+        colnames(scoresAndTaker)<-c("id",paste0(prefix,colnam))
         
         result<-merge(result,scoresAndTaker,by.x=colnames(result)[1],by.y=colnames(scoresAndTaker)[1],all.x=T)
       }
