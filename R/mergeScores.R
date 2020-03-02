@@ -56,16 +56,18 @@ mergeScores<-function(result,resp,column,prefix="",test.taker=NULL) {
         # Remove duplicate testTakers in resp by giving them the highest value
         
         dups<-which(duplicated(testTaker))
-        revised.testTaker<-testTaker[-dups]
-        revised.scores<-scores[-dups,]
-        for(x in dups) {
-          # Next time you meet a duplicate of the same testtaker, you will do the same calculation - no problem
-          tt<-testTaker[x]
-          max.score<-max(scores[testTaker==tt,],na.rm = T)
-          # give the max value to the unified testtaker
-          revised.scores[which(revised.testTaker==tt)]<-max.score
-        }
-        scoresAndTaker<-cbind(data.frame(revised.testTaker),data.frame(revised.scores))
+        if(length(dups)>0){
+          revised.testTaker<-testTaker[-dups]
+          revised.scores<-scores[-dups,]
+          for(x in dups) {
+            # Next time you meet a duplicate of the same testtaker, you will do the same calculation - no problem
+            tt<-testTaker[x]
+            max.score<-max(scores[testTaker==tt,],na.rm = T)
+            # give the max value to the unified testtaker
+            revised.scores[which(revised.testTaker==tt)]<-max.score
+          }
+          scoresAndTaker<-cbind(data.frame(revised.testTaker),data.frame(revised.scores))
+        } else {scoresAndTaker<-cbind(data.frame(testTaker),data.frame(scores))}
         colnames(scoresAndTaker)<-c("id",paste0(prefix,colnam))
         
         result<-merge(result,scoresAndTaker,by.x=colnames(result)[1],by.y=colnames(scoresAndTaker)[1],all.x=T)
