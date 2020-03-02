@@ -23,6 +23,15 @@ returns a result matrix
 \description{
 Merge scores from pre-coded items
 }
+\details{
+The data from \code{resp} are merged into \code{result} based on the \code{test.taker} column (either 1st column in \code{resp} or the \code{test.taker} vector).
+
+MergeScores returns a data.frame with the same number of rows as \code{result}.
+
+If there are duplets in the test-takers in \code{resp}, we first check if the order of test.takers in \code{result} and \code{resp} are exactly the same. If so, we \code{cbind} the scores (one by one).
+
+If not, we unify duplicate \code{test.takers} by giving them the highest score they have achieved, and then merge with \code{result} - giving duplicate \code{result} \code{test.takers} the same highest value.
+}
 \examples{
 # Make sure not to import data from item X20
 result<-data.frame(id=c("a","b","a","b","c","d","a"))

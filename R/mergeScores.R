@@ -6,6 +6,14 @@
 #' @param column String. The beginning of the name of the columns to merge with the results. If more columns start with the provided string, all of them are included.
 #' @param prefix Text to put before the variable name
 #'
+#' @details 
+#' The data from `resp` are merged into `result` based on the `test.taker` column (either 1st column in `resp` or the `test.taker` vector).
+#' 
+#' MergeScores returns a data.frame with the same number of rows as `result`. 
+#' 
+#' If there are duplets in the test-takers in `resp`, we first check if the order of test.takers in `result` and `resp` are exactly the same. If so, we `cbind` the scores (one by one).
+#' 
+#' If not, we unify duplicate `test.takers` by giving them the highest score they have achieved, and then merge with `result` - giving duplicate `result` `test.takers` the same highest value.
 #' @return returns a result matrix
 #' @export
 #'
