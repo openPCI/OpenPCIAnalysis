@@ -47,7 +47,7 @@ getScores<-function(data,pattern=".SCORE") {
 #'
 #' @examples getDurations(data,exclude="notthiscolumn")
 getDurations<-function(data,exclude="",TAO.version=33) {
-  durations<-lapply(data,function(x) {z<-x[,grep("duration",colnames(x))];rownames(z)<-x$Test.taker;return(z)})
+  durations<-lapply(data,function(x) {z<-x[,grep("duration",colnames(x))];return(z)}) #rownames(z)<-x$Test.taker;
   if(TAO.version<33) {
     durations<-lapply(durations,apply,1:2,function(x) {
       gsub("0([0-9]+[HM\\.])","\\1",sub("PT(([0-9]+)H)?(([0-9]+)M)?(([0-9]+)\\.([0-9]+)S)?","0\\2H0\\4M0\\6.\\70S",x))
