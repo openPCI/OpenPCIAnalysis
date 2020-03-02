@@ -12,7 +12,7 @@
 #' @examples
 #' # Make sure not to import data from item X20
 #' result<-mergeScores(result,prescoredresults,"X2[^0-9]","TM2_")
-mergeScores<-function(result,resp,column,prefix="",test.taker=NULL) {
+mergeScores<-function(result,resp,column,test.taker=NULL,prefix="") {
   if(!is.null(test.taker)) resp<-cbind(data.frame(test.taker=test.taker),resp)
   cols<-grepl(paste0("^",column),names(resp),ignore.case = T)
   if(any(cols)) {
