@@ -18,9 +18,11 @@ removeDuplicatedIds(result, idcol = colnames(result)[1])
 Remove duplicated ids
 }
 \details{
-Duplicated persons are combined into one. Scores on all variables are set to the max score given to this person on this variable. If there are only NA's on a variable, NA is retained.
+Duplicated persons are combined into one.
+
+Scores on all variables are set to the max score given to this person on this variable. If there are only NA's on a variable, NA is retained. Non-numeric variables are given the value of the first occurrence of the person.
 }
 \examples{
-result<-data.frame(id=c("b","b","a","a","c","d","a"),X1_result=c(1,NA,2,2,1,3,NA),X2_party=c(2,1,3,1,2,3,NA),X20_dont=c(NA,2,1,2,1,3,NA))
+result<-data.frame(id=c("b","b","a","a","c","d","a"),X1_result=c(1,NA,2,2,1,3,NA),X2_party=c(2,1,3,1,2,3,NA),X20_dont=c(NA,2,1,2,1,3,NA),sex=c("Male","Female","Male","Female","Female","Male","Female"))
 removeDuplicatedIds(result)
 }

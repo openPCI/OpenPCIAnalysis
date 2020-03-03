@@ -108,11 +108,13 @@ delist<-function(a) {
 #' @param result data.frame of scoring results.
 #' @param idcol the name of the column that contains person id's. If none given, the first column of `result` is used.
 #'
-#' @return
+#' @return Returns a data.frame with duplicated persons unified.
 #' @export
-#' @details Duplicated persons are combined into one. Scores on all variables are set to the max score given to this person on this variable. If there are only NA's on a variable, NA is retained.
+#' @details Duplicated persons are combined into one. 
+#' 
+#' Scores on all variables are set to the max score given to this person on this variable. If there are only NA's on a variable, NA is retained. Non-numeric variables are given the value of the first occurrence of the person.
 #' @examples
-#' result<-data.frame(id=c("b","b","a","a","c","d","a"),X1_result=c(1,NA,2,2,1,3,NA),X2_party=c(2,1,3,1,2,3,NA),X20_dont=c(NA,2,1,2,1,3,NA))
+#' result<-data.frame(id=c("b","b","a","a","c","d","a"),X1_result=c(1,NA,2,2,1,3,NA),X2_party=c(2,1,3,1,2,3,NA),X20_dont=c(NA,2,1,2,1,3,NA),sex=c("Male","Female","Male","Female","Female","Male","Female"))
 #' removeDuplicatedIds(result)
 removeDuplicatedIds<-function(result,idcol=colnames(result)[1]){
   if(any(duplicated(result[,idcol]))) {
@@ -124,5 +126,8 @@ removeDuplicatedIds<-function(result,idcol=colnames(result)[1]){
   result
 }
 maxNA<-function(vals) {
-  ifelse(all(is.na(vals)),NA,max(vals,na.rm=T))
+  #print(vals)
+  if(all(is.na(vals))) NA 
+  else if(is.numeric(vals)) max(vals,na.rm=T) 
+  else vals[1]
 }
