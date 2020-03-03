@@ -86,7 +86,7 @@ writeResult<-function(result,filename,resultsdir,exclude=c()) {
   if(!is.numeric(exclude)) exclude<-which(colnames(result) %in% exclude)
   #resp<-result[,2:ncol(result)]
   write.csv2(result,paste0(resultsdir,"raw_",filename,".csv"),row.names = F)
-  result[,-exclude]<-apply(result[,-exclude],1:2,function(x) ifelse(is.na(x),x,as.numeric(x)))
+  result[,-exclude]<-apply(result[,-exclude],2,as.numeric)
   #result[,2:ncol(result)]<-resp#apply(result[,2:ncol(result)],1:2,function(x) {ifelse(is.na(x),-1, as.numeric(x))})
   # result<-apply(result,1:2,function(x) x=ifelse(x==-1,NA,x))
   write.csv2(result,paste0(resultsdir,filename,".csv"),row.names = F)
