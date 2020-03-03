@@ -33,9 +33,10 @@ If there are duplets in the test-takers in \code{resp}, we first check if the or
 If not, we unify duplicate \code{test.takers} by giving them the highest score they have achieved, and then merge with \code{result} - giving duplicate \code{result} \code{test.takers} the same highest value.
 }
 \examples{
-# Make sure not to import data from item X20
 result<-data.frame(id=c("a","b","a","b","c","d","a"))
-resp<-data.frame(id=c("b","b","a","a","c","d","a"),X1=c(1,NA,2,2,1,3,NA))
+resp<-data.frame(id=c("b","b","a","a","c","d","a"),X1_result=c(1,NA,2,2,1,3,NA),X2_party=c(2,1,3,1,2,3,NA),X20_dont=c(NA,2,1,2,1,3,NA))
 
-result<-mergeScores(result=result,resp=resp,column="X1",prefix="X1_")
+result<-mergeScores(result=result,resp=resp,column="X1",prefix="CP_")
+# Make sure not to import data from item X20
+result<-mergeScores(result,resp,"X2[^0-9]","TM2_")
 }

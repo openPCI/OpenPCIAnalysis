@@ -18,11 +18,13 @@
 #' @export
 #'
 #' @examples
-#' # Make sure not to import data from item X20
 #' result<-data.frame(id=c("a","b","a","b","c","d","a"))
-#' resp<-data.frame(id=c("b","b","a","a","c","d","a"),X1=c(1,NA,2,2,1,3,NA))
+#' resp<-data.frame(id=c("b","b","a","a","c","d","a"),X1_result=c(1,NA,2,2,1,3,NA),X2_party=c(2,1,3,1,2,3,NA),X20_dont=c(NA,2,1,2,1,3,NA))
 #' 
-#' result<-mergeScores(result=result,resp=resp,column="X1",prefix="X1_")
+#' result<-mergeScores(result=result,resp=resp,column="X1",prefix="CP_")
+
+#' # Make sure not to import data from item X20
+#' result<-mergeScores(result,resp,"X2[^0-9]","TM2_")
 mergeScores<-function(result,resp,column,prefix="",test.taker=NULL) {
   if(!is.null(test.taker)) resp<-cbind(data.frame(test.taker=test.taker,stringsAsFactors = F),resp)
   cols<-grepl(paste0("^",column),names(resp),ignore.case = T)
