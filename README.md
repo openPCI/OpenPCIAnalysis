@@ -1,9 +1,9 @@
-# OpenPCIScoring
-R scripts to score data from PCI's
+# OpenPCIAnalysis
+R scripts to analyze data from PCI's
 
 # Howto
 ```
 install.packages("devtools")
 library(devtools)
-install_github("openPCI/OpenPCIScoring")
+install_github("openPCI/OpenPCIAnalysis")
 ```
