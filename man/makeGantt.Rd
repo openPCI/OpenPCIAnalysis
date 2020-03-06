@@ -22,6 +22,6 @@ Returns a Gantt object
 Make Gantt Object
 }
 \examples{
-response<-"{'response':'1/8 10:30 - 1/8 12:30;1/8 13:00 - 1/8 14:00;1/8 11:30 - 1/8 12:30'}"
+response<-"{'response':'1/8 10:30;1/8 13:00 - 1/8 14:00;1/8 11:30 - 1/8 12:30'}"
 makeGantt(response,names=c("waitress","actor","pianist"),timespan=30,time.format="\%d/\%m \%H:\%M")
 }

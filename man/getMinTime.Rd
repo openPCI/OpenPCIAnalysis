@@ -3,7 +3,7 @@
 \name{getMinTime}
 \alias{getMinTime}
 \alias{getMaxTime}
-\title{Get the element taking up the fewest/most time slots}
+\title{Get the element with minimum/maximum start/end}
 \usage{
 getMinTime(gantt, a, which)
 
@@ -14,17 +14,21 @@ getMaxTime(gantt, a, which)
 
 \item{a}{a vector of elements to compare}
 
-\item{which}{start/end}
+\item{which}{Which time to compare ("start" or "end")}
 }
 \value{
-Returns a vector of minimum/maximum time
+Returns minimum/maximum time of the earliest/latest element starting/ending in seconds
 }
 \description{
-Get the element taking up the fewest/most time slots
+Get the element with minimum/maximum start/end
+}
+\details{
+If an element among the compared is not present, NA is returned.
 }
 \examples{
-response<-matrix(c("{'response':'1/8 10:30 - 1/8 12:30;1/8 11:00 - 1/8 12:00;1/8 11:30 - 1/8 12:00'}","{'response':'1/8 12:00 - 1/8 12:30;1/8 11:00 - 1/8 12:00;1/8 10:30 - 1/8 11:00'}"))
-gantt<-makeGantt(response,names=c("waitress","actor","pianist"),timespan=30,time.format="\%d/\%m \%H:\%M")
-getMinTime(gantt,"actor",which="end")
+response<-matrix(c("{'response':'1/8 17:00;;1/8 17:00 - 1/8 18:00;1/8 18:00, 1/8 20:00 - 1/8 21:00;1/8 20:30;1/8 20:00 - 1/8 20:30;1/8 19:30 - 1/8 20:30'}"))
+gantt<-makeGantt(response,names=c("waitress","actor","pianist","bartender","cleaning","ticketer","musician"),timespan=30,time.format="\%d/\%m \%H:\%M")
+getMinTime(gantt,c("pianist","bartender"),which="start")
+getMaxTime(gantt,"bartender",which="end")
 getMaxTime(gantt,"actor",which="end")
 }

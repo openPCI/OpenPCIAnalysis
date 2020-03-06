@@ -12,13 +12,16 @@ getDuration(gantt, a)
 \item{a}{An element}
 }
 \value{
-
+Returns duration in seconds
 }
 \description{
 Get duration
 }
 \examples{
-response<-matrix(c("{'response':'1/8 10:30 - 1/8 12:30;1/8 13:00 - 1/8 14:00;1/8 11:30 - 1/8 12:30'}","{'response':'1/8 12:00 - 1/8 12:30;1/8 11:00 - 1/8 12:00;1/8 10:30 - 1/8 11:00'}"))
-gantt<-makeGantt(response,names=c("waitress","actor","pianist"),timespan=30,time.format="\%d/\%m \%H:\%M")
+response<-matrix(c("{'response':'1/8 17:00;1/8 17:00 - 1/8 17:30;1/8 17:00 - 1/8 18:00;1/8 17:00, 1/8 18:00, 1/8 19:00, 1/8 20:00;1/8 20:30;1/8 20:00 - 1/8 20:30;1/8 19:30 - 1/8 20:30'}"))
+gantt<-makeGantt(response2,names=c("waitress","actor","pianist","bartender","cleaning","ticketer","musician"),timespan=30,time.format="\%d/\%m \%H:\%M")
 getDuration(gantt,"actor")
+getDuration(gantt,"waitress")
+getDuration(gantt,"bartender")
+getDuration(gantt,"cleaning")
 }

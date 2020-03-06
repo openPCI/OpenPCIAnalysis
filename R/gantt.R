@@ -9,7 +9,7 @@
 #' @export
 #'
 #' @examples 
-#' response<-"{'response':'1/8 10:30 - 1/8 12:30;1/8 13:00 - 1/8 14:00;1/8 11:30 - 1/8 12:30'}"
+#' response<-"{'response':'1/8 10:30;1/8 13:00 - 1/8 14:00;1/8 11:30 - 1/8 12:30'}"
 #' makeGantt(response,names=c("waitress","actor","pianist"),timespan=30,time.format="%d/%m %H:%M")
 makeGantt<-function(gantt,names,timespan=30,time.format="%d/%m %H:%M") {
   #Clean
@@ -274,15 +274,16 @@ findRows<-function(gantt,a=gantt$names[1],type="used",stat="max") { #equals=NA,b
 #' @export
 #'
 #' @examples
-#' response<-"{'response':'1/8 10:30 - 1/8 12:30;1/8 13:00 - 1/8 14:00;1/8 11:30 - 1/8 12:30'}"
+#' response<-"{'response':'1/8 10:30;1/8 13:00 - 1/8 14:00;1/8 11:30 - 1/8 12:30'}"
 #' gantt<-makeGantt(response,names=c("waitress","actor","pianist"),timespan=30,time.format="%d/%m %H:%M")
+#' getTime(gantt,"waitress",which="end",human.readable=T)
 #' getTime(gantt,"actor",which="end",human.readable=T)
 getTime<-function(gantt,a=gantt$names[1],which="start",human.readable=FALSE) {
   delist(lapply(gantt$gantt,function(x) {
-    if(is.null(x[[a]])) return(0)
+    if(is.null(x[[a]])) return(NA)
     time<-switch (which,
       start = x[[a]][1],
-      end = x[[a]][length(x[[a]])]
+      end = x[[a]][length(x[[a]])]+gantt$timespan*60
     )
     if(human.readable) {
       class(time) = c('POSIXt','POSIXct')
@@ -292,20 +293,24 @@ getTime<-function(gantt,a=gantt$names[1],which="start",human.readable=FALSE) {
   }))
 }
 
-#' Get the element taking up the fewest/most time slots
+#' Get the minimum/maximum start/end time among elements
 #'
 #' @param gantt A gantt object (created by makeGantt)
 #' @param a a vector of elements to compare
-#' @param which start/end
+#' @param which Which time to compare ("start" or "end")
 #'
-#' @return Returns a vector of minimum/maximum time
+#' @return Returns minimum/maximum time in seconds of the earliest/latest element starting/ending
 #' @export
+#' @details If an element among the compared is not present, NA is returned.
 #'
 #' @examples
-#' response<-matrix(c("{'response':'1/8 10:30 - 1/8 12:30;1/8 11:00 - 1/8 12:00;1/8 11:30 - 1/8 12:00'}","{'response':'1/8 12:00 - 1/8 12:30;1/8 11:00 - 1/8 12:00;1/8 10:30 - 1/8 11:00'}"))
-#' gantt<-makeGantt(response,names=c("waitress","actor","pianist"),timespan=30,time.format="%d/%m %H:%M")
-#' getMinTime(gantt,"actor",which="end")
+#' response<-matrix(c("{'response':'1/8 17:00;;1/8 17:00 - 1/8 18:00;1/8 18:00, 1/8 20:00 - 1/8 21:00;1/8 20:30;1/8 20:00 - 1/8 20:30;1/8 19:30 - 1/8 20:30'}"))
+#' gantt<-makeGantt(response,names=c("waitress","actor","pianist","bartender","cleaning","ticketer","musician"),timespan=30,time.format="%d/%m %H:%M")
+#' getMinTime(gantt,c("pianist","bartender"),which="start")
+#' getMaxTime(gantt,"bartender",which="end")
 #' getMaxTime(gantt,"actor",which="end")
+#' as.difftime(getMaxTime(gantt,c("pianist","bartender"),which="end")-getMinTime(gantt,c("pianist","bartender"),which="start"),units = "secs")
+#' 
 getMinTime<- function (gantt,a,which) {
   #Create a list of infinite values to avoid warnings...
   c<-data.frame(max=rep(Inf,length(gantt$gantt)))
@@ -313,7 +318,7 @@ getMinTime<- function (gantt,a,which) {
     c[i]<-getTime(gantt,i,which)
   }
   minTime<-apply(c,1,min)
-  minTime<-apply(as.data.frame( minTime),1,function(x) ifelse(is.na(x),-Inf,x)) 
+  #minTime<-apply(as.data.frame( minTime),1,function(x) ifelse(is.na(x),-Inf,x)) 
     #mapply(min, getTime(gantt,a,which,human.readable = FALSE),getTime(gantt,b,which,human.readable = FALSE),c,MoreArgs = list(na.rm=TRUE))
 #  class(minTime)=c('POSIXt','POSIXct')
   return (minTime)
@@ -328,7 +333,7 @@ getMaxTime<- function (gantt,a,which) {
     c[i]<-getTime(gantt,i,which)
   }
   maxTime<-apply(c,1,max)
-  maxTime<-apply(as.data.frame( maxTime),1,function(x) ifelse(is.na(x),Inf,x)) 
+  #maxTime<-apply(as.data.frame( maxTime),1,function(x) ifelse(is.na(x),Inf,x)) 
   
   #maxTime<-mapply(max, getTime(gantt,a,which,human.readable = FALSE),getTime(gantt,b,which,human.readable = FALSE),c,MoreArgs = list(na.rm=TRUE))
  # class(maxTime)=c('POSIXt','POSIXct')
@@ -340,16 +345,20 @@ getMaxTime<- function (gantt,a,which) {
 #' @param gantt A gantt object (created by makeGantt)
 #' @param a An element
 #'
-#' @return
+#' @return Returns duration in seconds
 #' @export
 #'
 #' @examples
-#' response<-matrix(c("{'response':'1/8 10:30 - 1/8 12:30;1/8 13:00 - 1/8 14:00;1/8 11:30 - 1/8 12:30'}","{'response':'1/8 12:00 - 1/8 12:30;1/8 11:00 - 1/8 12:00;1/8 10:30 - 1/8 11:00'}"))
-#' gantt<-makeGantt(response,names=c("waitress","actor","pianist"),timespan=30,time.format="%d/%m %H:%M")
+#' response<-matrix(c("{'response':'1/8 17:00;1/8 17:00 - 1/8 17:30;1/8 17:00 - 1/8 18:00;1/8 17:00, 1/8 18:00, 1/8 19:00, 1/8 20:00;1/8 20:30;1/8 20:00 - 1/8 20:30;1/8 19:30 - 1/8 20:30'}"))
+#' gantt<-makeGantt(response2,names=c("waitress","actor","pianist","bartender","cleaning","ticketer","musician"),timespan=30,time.format="%d/%m %H:%M")
 #' getDuration(gantt,"actor")
+#' getDuration(gantt,"waitress")
+#' getDuration(gantt,"bartender")
+#' getDuration(gantt,"cleaning")
 
 getDuration<-function(gantt,a) {
-  getTime(gantt,a,"end")-getTime(gantt,a,"start")
+  numSlots(gantt = gantt,a = a)*gantt$timespan*60
+  #getTime(gantt,a,"end")-getTime(gantt,a,"start")
 }
 
 expandtime<-function(x,timespan,time.format) {
