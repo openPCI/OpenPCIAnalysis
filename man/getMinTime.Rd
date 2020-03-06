@@ -3,11 +3,11 @@
 \name{getMinTime}
 \alias{getMinTime}
 \alias{getMaxTime}
-\title{Get the element with minimum/maximum start/end}
+\title{Get the minimum/maximum start/end time among elements}
 \usage{
-getMinTime(gantt, a, which)
+getMinTime(gantt, a, which, strict = T)
 
-getMaxTime(gantt, a, which)
+getMaxTime(gantt, a, which, strict = T)
 }
 \arguments{
 \item{gantt}{A gantt object (created by makeGantt)}
@@ -15,15 +15,14 @@ getMaxTime(gantt, a, which)
 \item{a}{a vector of elements to compare}
 
 \item{which}{Which time to compare ("start" or "end")}
+
+\item{strict}{If TRUE and an element among the compared is not present, NA is returned.}
 }
 \value{
-Returns minimum/maximum time of the earliest/latest element starting/ending in seconds
+Returns minimum/maximum time in seconds of the earliest/latest element starting/ending
 }
 \description{
-Get the element with minimum/maximum start/end
-}
-\details{
-If an element among the compared is not present, NA is returned.
+Get the minimum/maximum start/end time among elements
 }
 \examples{
 response<-matrix(c("{'response':'1/8 17:00;;1/8 17:00 - 1/8 18:00;1/8 18:00, 1/8 20:00 - 1/8 21:00;1/8 20:30;1/8 20:00 - 1/8 20:30;1/8 19:30 - 1/8 20:30'}"))
@@ -31,4 +30,6 @@ gantt<-makeGantt(response,names=c("waitress","actor","pianist","bartender","clea
 getMinTime(gantt,c("pianist","bartender"),which="start")
 getMaxTime(gantt,"bartender",which="end")
 getMaxTime(gantt,"actor",which="end")
+as.difftime(getMaxTime(gantt,c("pianist","bartender"),which="end")-getMinTime(gantt,c("pianist","bartender"),which="start"),units = "secs")
+
 }

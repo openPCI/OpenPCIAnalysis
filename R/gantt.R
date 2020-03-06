@@ -298,26 +298,26 @@ getTime<-function(gantt,a=gantt$names[1],which="start",human.readable=FALSE) {
 #' @param gantt A gantt object (created by makeGantt)
 #' @param a a vector of elements to compare
 #' @param which Which time to compare ("start" or "end")
+#' @param strict If TRUE and an element among the compared is not present, NA is returned. 
 #'
 #' @return Returns minimum/maximum time in seconds of the earliest/latest element starting/ending
 #' @export
-#' @details If an element among the compared is not present, NA is returned.
 #'
 #' @examples
 #' response<-matrix(c("{'response':'1/8 17:00;;1/8 17:00 - 1/8 18:00;1/8 18:00, 1/8 20:00 - 1/8 21:00;1/8 20:30;1/8 20:00 - 1/8 20:30;1/8 19:30 - 1/8 20:30'}"))
 #' gantt<-makeGantt(response,names=c("waitress","actor","pianist","bartender","cleaning","ticketer","musician"),timespan=30,time.format="%d/%m %H:%M")
 #' getMinTime(gantt,c("pianist","bartender"),which="start")
-#' getMaxTime(gantt,"bartender",which="end")
+#' getMaxTime(gantt,c("actor","bartender"),which="end",strict=F)
 #' getMaxTime(gantt,"actor",which="end")
 #' as.difftime(getMaxTime(gantt,c("pianist","bartender"),which="end")-getMinTime(gantt,c("pianist","bartender"),which="start"),units = "secs")
 #' 
-getMinTime<- function (gantt,a,which) {
+getMinTime<- function (gantt,a,which,strict=T) {
   #Create a list of infinite values to avoid warnings...
   c<-data.frame(max=rep(Inf,length(gantt$gantt)))
   for(i in a) {
     c[i]<-getTime(gantt,i,which)
   }
-  minTime<-apply(c,1,min)
+  minTime<-apply(c,1,min,na.rm=!strict)
   #minTime<-apply(as.data.frame( minTime),1,function(x) ifelse(is.na(x),-Inf,x)) 
     #mapply(min, getTime(gantt,a,which,human.readable = FALSE),getTime(gantt,b,which,human.readable = FALSE),c,MoreArgs = list(na.rm=TRUE))
 #  class(minTime)=c('POSIXt','POSIXct')
@@ -326,13 +326,13 @@ getMinTime<- function (gantt,a,which) {
 # a is a vector of names
 #' @rdname getMinTime
 #' @export
-getMaxTime<- function (gantt,a,which) {
+getMaxTime<- function (gantt,a,which,strict=T) {
   #Create a list of 0 values to avoid warnings...
   c<-data.frame(min=matrix(rep(0,length(gantt$gantt))))
   for(i in a) {
     c[i]<-getTime(gantt,i,which)
   }
-  maxTime<-apply(c,1,max)
+  maxTime<-apply(c,1,max,na.rm=!strict)
   #maxTime<-apply(as.data.frame( maxTime),1,function(x) ifelse(is.na(x),Inf,x)) 
   
   #maxTime<-mapply(max, getTime(gantt,a,which,human.readable = FALSE),getTime(gantt,b,which,human.readable = FALSE),c,MoreArgs = list(na.rm=TRUE))
