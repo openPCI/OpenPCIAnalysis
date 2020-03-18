@@ -71,8 +71,13 @@ mergeScores<-function(result,resp,column,prefix="",test.taker=NULL) {
           scoresAndTaker<-cbind(data.frame(revised.testTaker),data.frame(revised.scores))
         } else {scoresAndTaker<-cbind(data.frame(testTaker),data.frame(scores))}
         colnames(scoresAndTaker)<-c("id",paste0(prefix,colnam))
-        
+        result$recreateorder<-1:nrow(result)
         result<-merge(result,scoresAndTaker,by.x=colnames(result)[1],by.y=colnames(scoresAndTaker)[1],all.x=T)
+        # Get the rows back in the same order...
+        rownames(result)<-result$recreateorder
+        result<-result[order(result$recreateorder),colnames(result)!="recreateorder"]
+        
+        #colnames(result)[1]
       }
     }
   } else warning(paste("Merge Scores: No column starting with",column,"in response data.frame"))
