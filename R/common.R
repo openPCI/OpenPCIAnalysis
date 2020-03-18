@@ -38,7 +38,7 @@ getScores<-function(data,pattern=".SCORE") {
 
 #' Calculate durations
 #'
-#' @param data List of modules
+#' @param data A data.frame or a list of data.frames (e.g. from test modules)
 #' @param exclude Columns containing this text should not be counted in. Use text1|text2 to exclude more than one text
 #' @param TAO.version Numeric value of TAO version. Versions before 33 provided POSIX information on the duration. Version 33 and after provides seconds.
 #' @description Calculate time spent on each item by all students. E.g. use this to set response to NA when the time spent is very few seconds.
@@ -46,7 +46,8 @@ getScores<-function(data,pattern=".SCORE") {
 #' @export
 #'
 #' @examples getDurations(data,exclude="notthiscolumn")
-getDurations<-function(data,exclude="",TAO.version=33) {
+getDurations<-function(data,exclude=NULL,TAO.version=33) {
+  if(!inherits(data,"list")) data<-list(data)
   durations<-lapply(data,function(x) {z<-x[,grep("duration",colnames(x))];return(z)}) #rownames(z)<-x$Test.taker;
   if(TAO.version<33) {
     durations<-lapply(durations,apply,1:2,function(x) {
@@ -58,7 +59,7 @@ getDurations<-function(data,exclude="",TAO.version=33) {
   # Remove columns with all NA's
   durations<-lapply(durations,function(x) x[,colSums(is.na(x))<nrow(x)])
   # Remove excludes
-  if(length(exclude>0))
+  if(!is.null(exclude))
     durations<-lapply(durations,function(x) x[,!grepl(exclude,colnames(x))])
   
   #Stats
@@ -68,6 +69,7 @@ getDurations<-function(data,exclude="",TAO.version=33) {
   testMean<-lapply(mean,sum)
   max<-lapply(durations,apply,2,max,na.rm=T)
   testMax<-lapply(max,sum)
+  if(length(durations)==1) durations<-durations[[1]]
   return (list(durations=durations,median=median,testMedian=testMedian,mean=mean,testMean=testMean,max=max,testMax=testMax))
 }
 

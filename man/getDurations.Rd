@@ -4,10 +4,10 @@
 \alias{getDurations}
 \title{Calculate durations}
 \usage{
-getDurations(data, exclude = "", TAO.version = 33)
+getDurations(data, exclude = NULL, TAO.version = 33)
 }
 \arguments{
-\item{data}{List of modules}
+\item{data}{A data.frame or a list of data.frames (e.g. from test modules)}
 
 \item{exclude}{Columns containing this text should not be counted in. Use text1|text2 to exclude more than one text}
 

@@ -9,9 +9,11 @@ Description: Automatic scoring and Analysis of OpenPCI-items
 License: GNU GPLv3 <https://www.gnu.org/licenses/gpl-3.0.en.html>
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
 Roxygen: list(markdown = TRUE)
 Imports:
-  jsonlite
+  jsonlite,
+  ggplot2,
+  qmethod
 Suggests:
   RDigram

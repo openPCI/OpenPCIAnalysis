@@ -1,4 +1,5 @@
 library(ggplot2)
+library(qmethod)
 #' Extract Q-method responses from JSON
 #'
 #' @param qjson A response vector from the OpenPCI wordrank PCI 
@@ -7,14 +8,16 @@ library(ggplot2)
 #' @export
 #'
 #' @examples
-#' #' qjson<-c("[[\"Running\"],[\"Walking\",\"Crawling\"],[\"Jumping\",\"Sprinting\",\"Jogging\"],[\"Strolling\",\"\",\"Standing\",\"Sitting\"]]",
+#' qjson<-c("[[\"Running\"],[\"Walking\",\"Crawling\"],[\"Jumping\",\"Sprinting\",\"Jogging\"],[\"Strolling\",\"\",\"Standing\",\"Sitting\"]]",
 #'          "[[\"Sitting\"],[\"Strolling\",\"Jogging\"],[\"Standing\",\"Sprinting\",\"Crawling\"],[\"Walking\",\"Running\",\"Jumping\"]]")
 #' q<-get.q(qjson)
 #' q
 get.q<-function(qjson) {
   qjson<-as.character(qjson)
   l<-unname(lapply(qjson,function(x) {if(!is.na(x) && nchar(x)>0) jsonlite::fromJSON(x,simplifyVector = T)}))
-  lapply(l,sapply,trimws)
+  q<-lapply(l,sapply,trimws)
+  class(q)<-"open.pci.q"
+  q
 }
 #' Collect Q-method-data from respondents into rows
 #'
@@ -24,21 +27,72 @@ get.q<-function(qjson) {
 #' @export
 #'
 #' @examples
-#' #' qjson<-c("[[\"Running\"],[\"Walking\",\"Crawling\"],[\"Jumping\",\"Sprinting\",\"Jogging\"],[\"Strolling\",\"\",\"Standing\",\"Sitting\"]]",
-#'          "[[\"Sitting\"],[\"Strolling\",\"Jogging\"],[\"Standing\",\"Sprinting\",\"Crawling\"],[\"Walking\",\"Running\",\"Jumping\"]]")
+#' qjson<-c("[[\"Running\"],[\"Walking\",\"Crawling\"],[\"Jumping\",\"Sprinting\",\"Jogging\"],[\"Strolling\",\"\",\"Standing\",\"Sitting\"]]",
+#'          "[[\"Sitting\"],[\"Strolling\",\"Jogging\"],[\"Standing\",\"Sprinting\",\"Crawling\"],[\"Walking\",\"Running\",\"Jumping\",\"Sleeping\"]]")
 #' q<-get.q(qjson)
 #' qrows<-get.q.rows(q)
 #' qrows
 get.q.rows<-function(q) {
-  maxrow<-max(sapply(q,length))
-  r<-sapply(1:maxrow,function(x) unlist(sapply(q,function(y) if(length(y)>=x) y[[x]] else NA)))
+  nqrow<-max(sapply(q,length))
+  r<-sapply(1:nqrow,function(x) unlist(sapply(q,function(y) if(length(y)>=x) y[[x]] else NA)))
+}
+
+#' Produce a data.frame from a open.pci.q object
+#'
+#' @param q A open.pci.q object
+#'
+#' @return Returns a data.frame with statements as rows and persons as columns. Each statement has a score on each person equal to the row it is put in by the person. The upper row has the highest value, the bottom row has the value 1. If a statement has not been put in a row, it gets 0 on this person.
+#' @export
+#'
+#' @examples
+#' qjson<-c("[[\"Running\"],[\"Walking\",\"Crawling\"],[\"Jumping\",\"Sprinting\",\"Jogging\"],[\"Strolling\",\"\",\"Standing\",\"Sitting\"]]",
+#'          "[[\"Sitting\"],[\"Strolling\",\"Jogging\"],[\"Standing\",\"Sprinting\",\"Crawling\"],[\"Walking\",\"Running\",\"Jumping\"]]")
+#' q<-get.q(qjson)
+#' get.q.df(q)
+get.q.df<-function(q) {
+  nqrow<-max(sapply(q,length))
+  statements<-unique(unlist(q))
+  statements<-statements[statements!=""]
+  nstat<-length(statements)
+  npers<-length(q)
+  q.df<-as.data.frame(matrix(rep(NA,nstat*npers),nrow = nstat),row.names=statements)
+  res<-rep(0,nstat)
+  for(p in 1:npers) q.df[,p]<-if(length(q[[p]])>0) apply(sapply(1:nqrow,function(x) {res[sapply(q[[p]][x],match,statements)]<-nqrow-x+1;res}),1,sum) else NA
+  q.df
+}
+
+#' Do a Q-Method analysis on the dataset
+#'
+#' @param q A, open.pci.q object from [get.q()]
+#' @param q.df Alternatively to q, provide a data.frame from [get.q.df()]
+#' @param only.complete Boolean. Only include persons who have used all statements.
+#' @param nfactors The number of factors to extract.
+#' @param rotation The type of rotation to use 
+#'
+#' @return Returns an object of QmethodRes. See [qmethod()] for explanation.
+#' @export
+#' @note The analysis is done by the qmethod-package.
+#' @seealso [qmethod()], [plot.QmethodRes()].
+#' @examples
+#' qjson<-c("[[\"Running\"],[\"Walking\",\"Crawling\"],[\"Jumping\",\"Sprinting\",\"Jogging\"],[\"Strolling\",\"\",\"Standing\",\"Sitting\"]]",
+#'          "[[\"Sitting\"],[\"Strolling\",\"Jogging\"],[\"Standing\",\"Sprinting\",\"Crawling\"],[\"Walking\",\"Running\",\"Jumping\"]]")
+#' q<-get.q(qjson)
+#' q.analysis(q)
+q.analysis<-function(q,q.df=get.q.df(q), only.complete=T,nfactors = 3, rotation = "varimax") {
+  nqrow<-max(sapply(q,length))
+  q.df.no.na<-q.df[,!apply(q.df,2,function(x) all(is.na(x)))]
+  # If statements has not been put into the q-matrix, they are given the value 0. Only complete leaves persons out that hasn't used all statements
+  if(only.complete) q.df.no.na<-q.df.no.na[,apply(q.df.no.na,2,function(x) all(!is.na(x) & x>0))]
+  distribution<-q.df.no.na[,!apply(q.df.no.na,2,function(x) any(is.na(x)))][,1]
+  distribution<-c(distribution[order(distribution)]) 
+  qmethod(q.df.no.na, nfactors = nfactors, rotation = rotation,forced = F,distribution=distribution)
 }
 #' Tabularize Q-method-data
 #'
 #' @param qrows A list of rows from [get.q.rows()]
 #' @param exclude A vector of values to exclude from the tabulation
 #'
-#' @return Returns a data.frame with three rows: Activity (the statements from wordrank), Frequency of this statement in this row, and the Row for which the Activity has this Frequency
+#' @return Returns a data.frame with three rows: Activity (the statements from wordrank), Frequency of this statement in this row, and the Row for which the Activity has this Frequency. Rows are numbered from the buttom (1) to the top (number of rows)
 #' @export
 #' @seealso [q.plot()]
 #' @examples
@@ -51,7 +105,7 @@ get.q.rows<-function(q) {
 q.distribution<-function(qrows,exclude=NULL) {
   qdistlist<-lapply(qrows,table)
   nqrow<-length(qdistlist)
-  df<-do.call("rbind",lapply(1:nqrow,function(x) {d<-as.data.frame(qdistlist[[x]]);d$Row<-x;d}))
+  df<-do.call("rbind",lapply(1:nqrow,function(x) {d<-as.data.frame(qdistlist[[x]]);d$Row<-nqrow-x+1;d}))
   colnames(df)<-c("Activity","Frequency","Row")
   df<-df[nchar(as.character(df$Activity))>0 & !is.na(df$Activity),]
   if(!is.null(exclude)) df<-df[!(df$Activity %in% exclude),]
@@ -95,3 +149,44 @@ q.plot<-function(qdist,title=NULL,subtitle=NULL,caption=NULL) {
   print(p)
   p
 }
+
+#' Show distribution of statements in factors
+#'
+#' @param QmethodRes A result object from [qmethod()] or a data.frame with statements as rownames and factors in columns with position of statements.
+#' @param marg Margin of rectangles (relative to size of retangle)
+#' @param linewidth Linewidth of texts in number of letters (longer lines are split at nearest space)
+#' @param show.plot If TRUE, plot is output to active dev.
+#' @return Returns a list of the produced plots.
+#' @export
+#'
+#' @examples
+#' qjson<-c("[[\"Running\"],[\"Walking\",\"Crawling\"],[\"Jumping\",\"Sprinting\",\"Jogging\"],[\"Strolling\",\"\",\"Standing\",\"Sitting\"]]",
+#'          "[[\"Sitting\"],[\"Strolling\",\"Jogging\"],[\"Standing\",\"Sprinting\",\"Crawling\"],[\"Walking\",\"Running\",\"Jumping\"]]")
+#' q<-get.q(qjson)
+#' result<-q.analysis(q)
+#' q.show.distribution(result)
+q.show.distribution<-function(QmethodRes,marg=0.03,linewidth=15,show.plot=T) {
+  plots<-list()
+  if(inherits(QmethodRes,"QmethodRes")) QmethodRes<-QmethodRes$zsc_n
+  for(i in 1:ncol(QmethodRes)) {
+    nrect<-table(QmethodRes[,i])
+    maxnrect<-max(nrect)
+    y1<-rev(rep(nrect,names(nrect)))
+    y2<-y1+1-marg*2
+    x1<-unlist(sapply(nrect,function(x) (1:x)+(maxnrect/2-(x)/2)))
+    x2<-x1+1-marg
+    txts<-sub("\n$","",gsub(pattern = paste0("(.{",linewidth,"}[^ ]+)"),replacement = "\\1\n",x = rownames(QmethodRes)[order(QmethodRes[,i],decreasing = T)]))
+    d=data.frame(x1=x1,x2=x2,y1=y1,y2=y2, t=rev(txts))
+    p<-ggplot() + 
+      scale_x_continuous(name="x") + 
+      scale_y_continuous(name="y") +
+      geom_rect(data=d, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), color="black", fill="transparent",linejoin = "round") +
+      geom_text(data=d, aes(x=x1+(x2-x1)/2, y=y1+(y2-y1)/2, label=t), size=4) +
+      theme_void()+
+      theme(legend.position = "none")
+    if(show.plot) print(p)
+    plots[[length(plots)+1]]<-p
+  }
+  invisible(plots)
+}
+

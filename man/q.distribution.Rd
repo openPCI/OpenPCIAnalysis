@@ -12,7 +12,7 @@ q.distribution(qrows, exclude = NULL)
 \item{exclude}{A vector of values to exclude from the tabulation}
 }
 \value{
-Returns a data.frame with three rows: Activity (the statements from wordrank), Frequency of this statement in this row, and the Row for which the Activity has this Frequency
+Returns a data.frame with three rows: Activity (the statements from wordrank), Frequency of this statement in this row, and the Row for which the Activity has this Frequency. Rows are numbered from the buttom (1) to the top (number of rows)
 }
 \description{
 Tabularize Q-method-data

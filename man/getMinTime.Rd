@@ -28,7 +28,7 @@ Get the minimum/maximum start/end time among elements
 response<-matrix(c("{'response':'1/8 17:00;;1/8 17:00 - 1/8 18:00;1/8 18:00, 1/8 20:00 - 1/8 21:00;1/8 20:30;1/8 20:00 - 1/8 20:30;1/8 19:30 - 1/8 20:30'}"))
 gantt<-makeGantt(response,names=c("waitress","actor","pianist","bartender","cleaning","ticketer","musician"),timespan=30,time.format="\%d/\%m \%H:\%M")
 getMinTime(gantt,c("pianist","bartender"),which="start")
-getMaxTime(gantt,"bartender",which="end")
+getMaxTime(gantt,c("actor","bartender"),which="end",strict=F)
 getMaxTime(gantt,"actor",which="end")
 as.difftime(getMaxTime(gantt,c("pianist","bartender"),which="end")-getMinTime(gantt,c("pianist","bartender"),which="start"),units = "secs")
 
