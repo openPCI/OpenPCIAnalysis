@@ -16,6 +16,6 @@ Returns a multiple choice object
 Make a multiple choise object
 }
 \examples{
-mcresp<-c("['choice_1'; 'choice_5']","['choice_5'; 'choice_6']")
+mcresp<-c("['choice_1'; 'choice_5']","['choice_5'; 'choice_6'; 'choice_7']")
 mc<-makeMC(mcresp)
 }

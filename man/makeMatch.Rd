@@ -19,3 +19,6 @@ Make a match object
 matchresponse<-c("[mail1 annoyed; mail4 annoyed; mail2 angry]","[mail1 confused]")
 matchObject<-makeMatch(matchresponse)
 }
+\seealso{
+\code{\link[=scoreMatch]{scoreMatch()}}, \code{\link[=explodeMatch]{explodeMatch()}}
+}

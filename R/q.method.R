@@ -68,24 +68,31 @@ get.q.df<-function(q) {
 #' @param only.complete Boolean. Only include persons who have used all statements.
 #' @param nfactors The number of factors to extract.
 #' @param rotation The type of rotation to use 
+#' @param cor.method Which method to use for the correlations in [cor()] ("pearson", "spearmann", "kendall"). 
+#' Pearson is default in qmethod, but given that the data is ordinal, not interval scaled, Kendall's tau is default in q.analysis.
+#' @param nsteps The number of repetitions to use when bootstrapping (to get estimates of standard errors and bias). See [qmboots()].
+#' @param indet Indeterminacy method ("qindtest", "procrustes"). Default is qindtest, use procrustes for more than three factors. See [qmboots()].
 #'
 #' @return Returns an object of QmethodRes. See [qmethod()] for explanation.
 #' @export
 #' @note The analysis is done by the qmethod-package.
-#' @seealso [qmethod()], [plot.QmethodRes()].
+#' @seealso [qmethod()], [qmboots()], [cor()], [plot.QmethodRes()].
 #' @examples
 #' qjson<-c("[[\"Running\"],[\"Walking\",\"Crawling\"],[\"Jumping\",\"Sprinting\",\"Jogging\"],[\"Strolling\",\"\",\"Standing\",\"Sitting\"]]",
 #'          "[[\"Sitting\"],[\"Strolling\",\"Jogging\"],[\"Standing\",\"Sprinting\",\"Crawling\"],[\"Walking\",\"Running\",\"Jumping\"]]")
 #' q<-get.q(qjson)
 #' q.analysis(q)
-q.analysis<-function(q,q.df=get.q.df(q), only.complete=T,nfactors = 3, rotation = "varimax") {
-  nqrow<-max(sapply(q,length))
+q.analysis<-function(q=NULL,q.df=get.q.df(q), only.complete=T,nfactors = 3, rotation = "varimax", cor.method="kendall", nsteps=NULL, indet="qindtest") {
+  #nqrow<-max(sapply(q,length))
   q.df.no.na<-q.df[,!apply(q.df,2,function(x) all(is.na(x)))]
   # If statements has not been put into the q-matrix, they are given the value 0. Only complete leaves persons out that hasn't used all statements
   if(only.complete) q.df.no.na<-q.df.no.na[,apply(q.df.no.na,2,function(x) all(!is.na(x) & x>0))]
   distribution<-q.df.no.na[,!apply(q.df.no.na,2,function(x) any(is.na(x)))][,1]
   distribution<-c(distribution[order(distribution)]) 
-  qmethod(q.df.no.na, nfactors = nfactors, rotation = rotation,forced = F,distribution=distribution)
+  if(!is.null(nsteps))
+    qmboots(dataset = q.df.no.na, nfactors = nfactors, rotation = rotation,cor.method = cor.method,forced = F,distribution=distribution,indet = indet,nsteps = nsteps)
+  else 
+    qmethod(dataset = q.df.no.na, nfactors = nfactors, rotation = rotation,cor.method = cor.method,forced = F,distribution=distribution)
 }
 #' Tabularize Q-method-data
 #'
@@ -133,13 +140,14 @@ q.plot<-function(qdist,title=NULL,subtitle=NULL,caption=NULL) {
   # We need to order activities based on all rows to make sure they are present
   nqrow<-max(qdist$Row)
   l<-c()
-  for(i in 1:nqrow) {
+  for(i in nqrow:1) {
     n<-setdiff(qdist$Activity[qdist$Row==i],l)
     l<-c(n[order(qdist$Frequency[(qdist$Activity %in% n) & qdist$Row==i])],l)
   }
   l<-na.omit(l)
   qdist$Activity<-factor(qdist$Activity,levels=l)
   qdist$Percent<-apply(qdist,1,function(x) {as.numeric(x["Frequency"])/sum(qdist$Frequency[qdist$Row==as.numeric(x["Row"])])})
+  qdist$Row<-factor(qdist$Row,levels = nqrow:1)
   p<-ggplot(qdist,mapping = aes(x=Activity,y=Percent))+
     facet_wrap(facets = vars(Row),ncol=3)+
     geom_col()+

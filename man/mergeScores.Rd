@@ -24,7 +24,7 @@ returns a result matrix
 Merge scores from pre-coded items
 }
 \details{
-The data from \code{resp} are merged into \code{result} based on the \code{test.taker} column (either 1st column in \code{resp} or the \code{test.taker} vector).
+The data from \code{resp} are merged into \code{result} based on the \code{test.taker} column (either 1st column in \code{resp} or the \code{test.taker} vector). Both numeric scores and scores which are part of a JSON object are processed.
 
 MergeScores returns a data.frame with the same number of rows as \code{result}.
 

@@ -7,7 +7,7 @@
 #' @param prefix Text to put before the variable name
 #'
 #' @details 
-#' The data from `resp` are merged into `result` based on the `test.taker` column (either 1st column in `resp` or the `test.taker` vector).
+#' The data from `resp` are merged into `result` based on the `test.taker` column (either 1st column in `resp` or the `test.taker` vector). Both numeric scores and scores which are part of a JSON object are processed.
 #' 
 #' MergeScores returns a data.frame with the same number of rows as `result`. 
 #' 
@@ -64,9 +64,9 @@ mergeScores<-function(result,resp,column,prefix="",test.taker=NULL) {
           for(x in dups) {
             # Next time you meet a duplicate of the same testtaker, you will do the same calculation - no problem
             tt<-testTaker[x]
-            max.score<-max(scores[testTaker==tt,],na.rm = T)
+            max.score<-apply(scores[testTaker==tt,],2,max,na.rm = T)
             # give the max value to the unified testtaker
-            revised.scores[which(revised.testTaker==tt)]<-max.score
+            revised.scores[which(revised.testTaker==tt),]<-max.score
           }
           scoresAndTaker<-cbind(data.frame(revised.testTaker),data.frame(revised.scores))
         } else {scoresAndTaker<-cbind(data.frame(testTaker),data.frame(scores))}

@@ -5,7 +5,7 @@
 #'
 #' @return Returns a matchObject
 #' @export
-#'
+#' @seealso [scoreMatch()], [explodeMatch()]
 #' @examples
 #' matchresponse<-c("[mail1 annoyed; mail4 annoyed; mail2 angry]","[mail1 confused]")
 #' matchObject<-makeMatch(matchresponse)
@@ -17,8 +17,9 @@ makeMatch<-function(resp) {
   resp<-gsub("\\]","}",resp)
  resp<-gsub("([[:alnum:]_]+)","\"\\1\"",resp)
   resp[resp==""]<-"{}"
-  
-  matchObject<-apply(as.array(resp),1,jsonlite::fromJSON)
+  matchObject<-rep(NA,length(resp))
+  nona<-!is.na(resp)
+  matchObject[nona]<-apply(as.array(resp[nona]),1,jsonlite::fromJSON)
   class(matchObject)<-"matchObject"
   matchObject
 }
@@ -38,4 +39,40 @@ makeMatch<-function(resp) {
 #' scoreMatch(matchObject,"mail1",c("happy","annoyed"))
 scoreMatch<-function(resp,identifier,correct=c()) {
   return (as.logical(lapply(resp,function(x) {length(intersect(x[names(x)==identifier],correct))})))
+}
+
+#' Explode a Match interaction into a data frame
+#'
+#' @param resp The response column from TAO or a matchObject from [makeMatch()]
+#' @param vals.as.numeric Convert values to numeric (by removing letters and other non-numeric parts of value)
+#'
+#' @return Returns a data.frame
+#' @export
+#' @details This function is used when a Match interaction is used to ask a number of questions (in rows) with shared response options (in columns)
+#'
+#' @examples
+#' matchresponse<-c("[agree q1; disagree q2; agree q3; disagree q4]","[agree q1; disagree q2; agree q3; agree q4]")
+#' explodeMatch(matchresponse,vals.as.numeric=F)
+explodeMatch<-function(resp,vals.as.numeric=T) {
+  match.data<-if(!inherits(resp,"matchObject")) makeMatch(resp) else resp
+  cols<-setdiff(unique(unlist(match.data)),NA)
+  dummydf<-matrix(ncol=length(cols), dimnames = list(NULL,cols))
+  
+  do.call(rbind,lapply(match.data,function(x) 
+    if(!is.na(x) && length(x)>0) {
+      df<-matrix(
+        if(vals.as.numeric) as.numeric(gsub("[^0-9]","",names(x))) else names(x),
+        ncol=length(x),
+        dimnames = list(NULL,x)
+      )
+      if(ncol(df)<ncol(dummydf)){
+        df<-cbind(
+          as.data.frame(t(dummydf[,!(colnames(dummydf) %in% x)])),
+          df
+        ) 
+      }
+      df[,cols]
+    } else dummydf
+  ))
+  
 }
