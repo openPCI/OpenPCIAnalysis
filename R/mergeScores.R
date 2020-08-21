@@ -36,7 +36,7 @@ mergeScores<-function(result,resp,column,prefix="",test.taker=NULL) {
         colnam<-sub(".*\\.(.*)","\\1",colnames(resp)[onecolumn])
       } else {
         respcolumn[respcolumn==""]<-"[]"
-        all<-apply(as.array(respcolumn),1,function(x) {if(nchar(x)==65535) {warning("A json-cell was out of space (had more than 65535 characters). Not included");} else {jsonlite::fromJSON(x)}})
+        all<-apply(as.array(respcolumn),1,function(x) {if(is.na(x) || nchar(x)>=65535) {warning("A json-cell was out of space (had more than 65535 characters). Score was set to NA"); x<-'{}';}; jsonlite::fromJSON(x)})
         i<-1
         while(length(all[[i]])==0) i<-i+1
         numelm<-length(all[[i]][["score"]])
@@ -64,7 +64,7 @@ mergeScores<-function(result,resp,column,prefix="",test.taker=NULL) {
           for(x in dups) {
             # Next time you meet a duplicate of the same testtaker, you will do the same calculation - no problem
             tt<-testTaker[x]
-            if(is.null(ncol(revised.testTaker))) {
+            if(is.null(ncol(scores)) || ncol(scores)==1) {
               max.score<-max(scores[testTaker==tt,],na.rm = T)
               # give the max value to the unified testtaker
               revised.scores[which(revised.testTaker==tt)]<-max.score
