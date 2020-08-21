@@ -64,9 +64,15 @@ mergeScores<-function(result,resp,column,prefix="",test.taker=NULL) {
           for(x in dups) {
             # Next time you meet a duplicate of the same testtaker, you will do the same calculation - no problem
             tt<-testTaker[x]
-            max.score<-apply(scores[testTaker==tt,],2,max,na.rm = T)
-            # give the max value to the unified testtaker
-            revised.scores[which(revised.testTaker==tt),]<-max.score
+            if(is.null(ncol(revised.testTaker))) {
+              max.score<-max(scores[testTaker==tt,],na.rm = T)
+              # give the max value to the unified testtaker
+              revised.scores[which(revised.testTaker==tt)]<-max.score
+            } else {
+              max.score<-apply(scores[testTaker==tt,],2,max,na.rm = T)
+              # give the max value to the unified testtaker
+              revised.scores[which(revised.testTaker==tt),]<-max.score
+            }
           }
           scoresAndTaker<-cbind(data.frame(revised.testTaker),data.frame(revised.scores))
         } else {scoresAndTaker<-cbind(data.frame(testTaker),data.frame(scores))}
