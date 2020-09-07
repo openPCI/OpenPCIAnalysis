@@ -4,12 +4,14 @@
 \alias{explodeMatch}
 \title{Explode a Match interaction into a data frame}
 \usage{
-explodeMatch(resp, vals.as.numeric = T)
+explodeMatch(resp, vals.as.numeric = T, columns.as.variables = F)
 }
 \arguments{
 \item{resp}{The response column from TAO or a matchObject from \code{\link[=makeMatch]{makeMatch()}}}
 
 \item{vals.as.numeric}{Convert values to numeric (by removing letters and other non-numeric parts of value)}
+
+\item{columns.as.variables}{Boolean. Set to use columns as variables instead of rows.}
 }
 \value{
 Returns a data.frame

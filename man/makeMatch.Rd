@@ -4,10 +4,12 @@
 \alias{makeMatch}
 \title{Make a match object}
 \usage{
-makeMatch(resp)
+makeMatch(resp, columns.as.variables = F)
 }
 \arguments{
 \item{resp}{a vector of match responses from TAO}
+
+\item{columns.as.variables}{Boolean. Set to use columns as variables instead of rows.}
 }
 \value{
 Returns a matchObject
