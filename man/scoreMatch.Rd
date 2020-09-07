@@ -4,14 +4,12 @@
 \alias{scoreMatch}
 \title{Score match responses}
 \usage{
-scoreMatch(resp, identifier, correct = c(), columns.as.variables = F)
+scoreMatch(resp, identifier, correct = c(), variables.in.columns = F)
 }
 \arguments{
 \item{identifier}{The variable that has been given (a) corresponding value(s)}
 
 \item{correct}{The correct values}
-
-\item{columns.as.variables}{Boolean. Set to use columns as variables instead of rows.}
 
 \item{matchObject}{A matchObject}
 }

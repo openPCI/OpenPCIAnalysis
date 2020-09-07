@@ -4,14 +4,14 @@
 \alias{explodeMatch}
 \title{Explode a Match interaction into a data frame}
 \usage{
-explodeMatch(resp, vals.as.numeric = T, columns.as.variables = F)
+explodeMatch(resp, vals.as.numeric = T, variables.in.columns = F)
 }
 \arguments{
 \item{resp}{The response column from TAO or a matchObject from \code{\link[=makeMatch]{makeMatch()}}}
 
 \item{vals.as.numeric}{Convert values to numeric (by removing letters and other non-numeric parts of value)}
 
-\item{columns.as.variables}{Boolean. Set to use columns as variables instead of rows.}
+\item{variables.in.columns}{Boolean. Set to use columns as variables instead of rows.}
 }
 \value{
 Returns a data.frame
@@ -25,4 +25,6 @@ This function is used when a Match interaction is used to ask a number of questi
 \examples{
 matchresponse<-c("[agree q1; disagree q2; agree q3; disagree q4]","[agree q1; disagree q2; agree q3; agree q4]")
 explodeMatch(matchresponse,vals.as.numeric=F)
+matchresponse<-c("[annoyed mail1; angry mail2]","[annoyed mail2; angry mail2]")
+explodeMatch(matchresponse,vals.as.numeric=F,variables.in.columns=T)
 }
