@@ -3,6 +3,7 @@ library(qmethod)
 #' Extract Q-method responses from JSON
 #'
 #' @param qjson A response vector from the OpenPCI wordrank PCI 
+#' @param positive Which corner is the most positive value: "top" (default), "bottom", "left", "right".
 #'
 #' @return Returns a list of responses, each consisting of a list ranked rows
 #' @export
@@ -12,9 +13,23 @@ library(qmethod)
 #'          "[[\"Sitting\"],[\"Strolling\",\"Jogging\"],[\"Standing\",\"Sprinting\",\"Crawling\"],[\"Walking\",\"Running\",\"Jumping\"]]")
 #' q<-get.q(qjson)
 #' q
-get.q<-function(qjson) {
+#' q<-get.q(qjson,"right")
+#' q
+get.q<-function(qjson,positive=c("top", "bottom", "left", "right")) {
+  positive<-match.arg(positive)
   qjson<-as.character(qjson)
-  l<-unname(lapply(qjson,function(x) {if(!is.na(x) && nchar(x)>0) jsonlite::fromJSON(x,simplifyVector = T)}))
+  l<-unname(lapply(qjson,function(x) {
+    if(!is.na(x) && nchar(x)>0) {
+      q1<-jsonlite::fromJSON(x,simplifyVector = T)
+      if(positive=="left" || positive=="right") {
+        q1<-sapply(data.table::transpose(q1),function(y) y[!is.na(y)])
+      }
+      if(positive=="bottom" || positive=="right") {
+        q1<-rev(q1)
+      } 
+     q1
+    }
+  }))
   q<-lapply(l,sapply,trimws)
   class(q)<-"open.pci.q"
   q
@@ -72,6 +87,8 @@ get.q.df<-function(q) {
 #' Pearson is default in qmethod, but given that the data is ordinal, not interval scaled, Kendall's tau is default in q.analysis.
 #' @param nsteps The number of repetitions to use when bootstrapping (to get estimates of standard errors and bias). See [qmboots()].
 #' @param indet Indeterminacy method ("qindtest", "procrustes"). Default is qindtest, use procrustes for more than three factors. See [qmboots()].
+#' @param distribution Distribution provided as a vector of numbers, such as c(1, 1, 1, 2, 2, 3), signifying three cells in the lowest row, two cells in the middle row, and one cell in the highest row.
+#' @param exclude.cases A vector of cases to exclude (e.g. c("V33", "V38", "V59", "V107"))
 #'
 #' @return Returns an object of QmethodRes. See [qmethod()] for explanation.
 #' @export
@@ -79,16 +96,28 @@ get.q.df<-function(q) {
 #' @seealso [qmethod()], [qmboots()], [cor()], [plot.QmethodRes()].
 #' @examples
 #' qjson<-c("[[\"Running\"],[\"Walking\",\"Crawling\"],[\"Jumping\",\"Sprinting\",\"Jogging\"],[\"Strolling\",\"\",\"Standing\",\"Sitting\"]]",
-#'          "[[\"Sitting\"],[\"Strolling\",\"Jogging\"],[\"Standing\",\"Sprinting\",\"Crawling\"],[\"Walking\",\"Running\",\"Jumping\"]]")
+#'          "[[\"Sitting\"],[\"Strolling\",\"Jogging\"],[\"Standing\",\"Sprinting\",\"Crawling\"],[\"Walking\",\"Running\",\"Jumping\"]]",
+#'          "[[\"Strolling\"],[\"Sitting\",\"Standing\"],[\"Jogging\",\"Sprinting\",\"Crawling\"],[\"Walking\",\"Running\",\"Jumping\"]]")
 #' q<-get.q(qjson)
 #' q.analysis(q)
-q.analysis<-function(q=NULL,q.df=get.q.df(q), only.complete=T,nfactors = 3, rotation = "varimax", cor.method="kendall", nsteps=NULL, indet="qindtest") {
-  #nqrow<-max(sapply(q,length))
+q.analysis<-function(q=NULL,q.df=get.q.df(q), only.complete=T,nfactors = 3, rotation = "varimax", cor.method="kendall", nsteps=NULL, indet="qindtest",distribution=NULL, exclude.cases=NULL) {
+  if(!is.null(q.df)) q.df <- q.df[,!(colnames(q.df) %in% exclude.cases)]
   q.df.no.na<-q.df[,!apply(q.df,2,function(x) all(is.na(x)))]
+  
   # If statements has not been put into the q-matrix, they are given the value 0. Only complete leaves persons out that hasn't used all statements
   if(only.complete) q.df.no.na<-q.df.no.na[,apply(q.df.no.na,2,function(x) all(!is.na(x) & x>0))]
-  distribution<-q.df.no.na[,!apply(q.df.no.na,2,function(x) any(is.na(x)))][,1]
-  distribution<-c(distribution[order(distribution)]) 
+  if(is.null(distribution)) {
+    if(class(q)!="open.pci.q") stop("You need to provide a q object, if you don't provide a distribution")
+    qrows<-get.q.rows(q)
+    qdist<-q.distribution(qrows)
+    maxval<-max(qdist$Row)
+    dist.vector<-rep(0,maxval)
+    for(r in 1:nrow(qdist)) dist.vector[qdist$Row[r]]<-dist.vector[qdist$Row[r]]+qdist$Frequency[r]
+    dist.vector<-ceiling(dist.vector/(sum(dist.vector)/(nlevels(qdist$Activity)-1)))
+    distribution<-rep(1,sum(dist.vector))
+    for(i in 2:maxval) distribution[sum(dist.vector[1:(i-1)]):sum(dist.vector[1:i])]<-i
+    while(length(distribution)>(nlevels(qdist$Activity)-1)) distribution<-distribution[-1]
+  }
   if(!is.null(nsteps))
     qmboots(dataset = q.df.no.na, nfactors = nfactors, rotation = rotation,cor.method = cor.method,forced = F,distribution=distribution,indet = indet,nsteps = nsteps)
   else 
