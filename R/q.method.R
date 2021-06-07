@@ -4,6 +4,7 @@ library(qmethod)
 #'
 #' @param qjson A response vector from the OpenPCI wordrank PCI 
 #' @param positive Which corner is the most positive value: "top" (default), "bottom", "left", "right".
+#' @param start.values If position is left or right, and the Q figure is not balanced, you should provide a vector of first available slots (e.g. if a pyramid starts at 3 points in the highest row, 2 points in the middle row, and 1 point in the lowest row c(3,2,1))
 #'
 #' @return Returns a list of responses, each consisting of a list ranked rows
 #' @export
@@ -13,15 +14,24 @@ library(qmethod)
 #'          "[[\"Sitting\"],[\"Strolling\",\"Jogging\"],[\"Standing\",\"Sprinting\",\"Crawling\"],[\"Walking\",\"Running\",\"Jumping\"]]")
 #' q<-get.q(qjson)
 #' q
-#' q<-get.q(qjson,"right")
+#' q<-get.q(qjson,positive="right")
 #' q
-get.q<-function(qjson,positive=c("top", "bottom", "left", "right")) {
+get.q<-function(qjson,positive=c("top", "bottom", "left", "right"),start.values=NULL) {
   positive<-match.arg(positive)
   qjson<-as.character(qjson)
+  if((positive %in% c("left","right")) && is.null(start.values)) {
+    q1<-jsonlite::fromJSON(qjson[[1]],simplifyVector = T)
+    nrows<-length(q1)
+    nslots<-sapply(q1,length)
+    maxslots<-max(nslots)
+    start.values<-rep(1,nrows)
+    for(i in 1:nrows) start.values[i]<-ceiling((maxslots-nslots[i])/2)+1
+  }
   l<-unname(lapply(qjson,function(x) {
     if(!is.na(x) && nchar(x)>0) {
       q1<-jsonlite::fromJSON(x,simplifyVector = T)
       if(positive=="left" || positive=="right") {
+        q1<-sapply(1:length(start.values), function(y) c(rep("",start.values[y]-1),q1[[y]]))
         q1<-sapply(data.table::transpose(q1),function(y) y[!is.na(y)])
       }
       if(positive=="bottom" || positive=="right") {
